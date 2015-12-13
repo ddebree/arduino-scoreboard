@@ -1,31 +1,13 @@
-#include <Wire.h>
-#include "Adafruit_MCP23008.h"
+#define DIGIT_TOP 0b00000001
+#define DIGIT_MIDDLE 0b01000000
+#define DIGIT_BOTTOM 0b00100000
+#define DIGIT_LEFT_TOP 0b10000000
+#define DIGIT_LEFT_BOTTOM 0b00000010
+#define DIGIT_RIGHT_TOP 0b00001000
+#define DIGIT_RIGHT_BOTTOM 0b00000100
 
-#include "defines.h"
-
-Adafruit_MCP23008 sevenSegs[8];
-
-void setup() {
-  for (uint8_t i = 0; i < 8; i++) {
-    sevenSegs[i].begin(i);
-    for (uint8_t j = 0; j < 8; j++) {
-      sevenSegs[i].pinMode(j, OUTPUT);
-    }
-  }
-}
-
-void loop() {
-  for (uint8_t i = 0; i < 8; i++) {
-    for (uint8_t j = 0; j < 10; j++) {
-      sevenSegs[i].writeGPIO(decodeDigit(j));
-      delay(200);
-      sevenSegs[i].writeGPIO(0);
-    }
-  }
-}
-
-uint8_t decodeDigit(uint8_t input) {
-  if (input == 0) {
+/*
+if (input == 0) {
     return DIGIT_TOP | DIGIT_BOTTOM | DIGIT_LEFT_TOP | DIGIT_LEFT_BOTTOM | DIGIT_RIGHT_TOP | DIGIT_RIGHT_BOTTOM;
   } else if (input == 1) {
     return DIGIT_RIGHT_TOP | DIGIT_RIGHT_BOTTOM;
@@ -47,5 +29,4 @@ uint8_t decodeDigit(uint8_t input) {
     return DIGIT_TOP | DIGIT_MIDDLE | DIGIT_LEFT_TOP | DIGIT_RIGHT_TOP | DIGIT_RIGHT_BOTTOM;
   } else {
     return 0;
-  }      
-}
+    */
