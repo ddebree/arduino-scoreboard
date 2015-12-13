@@ -18,34 +18,24 @@ void loop() {
   for (uint8_t i = 0; i < 8; i++) {
     for (uint8_t j = 0; j < 10; j++) {
       sevenSegs[i].writeGPIO(decodeDigit(j));
-      delay(200);
+      delay(300);
       sevenSegs[i].writeGPIO(0);
     }
   }
 }
 
 uint8_t decodeDigit(uint8_t input) {
-  if (input == 0) {
-    return DIGIT_TOP | DIGIT_BOTTOM | DIGIT_LEFT_TOP | DIGIT_LEFT_BOTTOM | DIGIT_RIGHT_TOP | DIGIT_RIGHT_BOTTOM;
-  } else if (input == 1) {
-    return DIGIT_RIGHT_TOP | DIGIT_RIGHT_BOTTOM;
-  } else if (input == 2) {
-    return DIGIT_TOP | DIGIT_MIDDLE | DIGIT_BOTTOM | DIGIT_LEFT_BOTTOM | DIGIT_RIGHT_TOP;
-  } else if (input == 3) {
-    return DIGIT_TOP | DIGIT_MIDDLE | DIGIT_BOTTOM | DIGIT_RIGHT_TOP | DIGIT_RIGHT_BOTTOM;
-  } else if (input == 4) {
-    return DIGIT_MIDDLE | DIGIT_LEFT_TOP | DIGIT_RIGHT_TOP | DIGIT_RIGHT_BOTTOM;
-  } else if (input == 5) {
-    return DIGIT_TOP | DIGIT_MIDDLE | DIGIT_BOTTOM | DIGIT_LEFT_TOP | DIGIT_RIGHT_BOTTOM;
-  } else if (input == 6) {
-    return DIGIT_TOP | DIGIT_MIDDLE | DIGIT_BOTTOM | DIGIT_LEFT_TOP | DIGIT_LEFT_BOTTOM | DIGIT_RIGHT_BOTTOM;
-  } else if (input == 7) {
-    return DIGIT_TOP | DIGIT_RIGHT_TOP | DIGIT_RIGHT_BOTTOM;
-  } else if (input == 8) {
-    return DIGIT_TOP | DIGIT_MIDDLE | DIGIT_BOTTOM | DIGIT_LEFT_TOP | DIGIT_LEFT_BOTTOM | DIGIT_RIGHT_TOP | DIGIT_RIGHT_BOTTOM;
-  } else if (input == 9) {
-    return DIGIT_TOP | DIGIT_MIDDLE | DIGIT_LEFT_TOP | DIGIT_RIGHT_TOP | DIGIT_RIGHT_BOTTOM;
-  } else {
-    return 0;
-  }      
+  switch (input) {
+    case 0: return DIGIT_0;
+    case 1: return DIGIT_1;
+    case 2: return DIGIT_2;
+    case 3: return DIGIT_3;
+    case 4: return DIGIT_4;
+    case 5: return DIGIT_5;
+    case 6: return DIGIT_6;
+    case 7: return DIGIT_7;
+    case 8: return DIGIT_8;
+    case 9: return DIGIT_9;
+    default: return 0;
+  }    
 }
