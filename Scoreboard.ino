@@ -5,23 +5,21 @@
 #include <LightChrono.h>
 
 #include "defines.h"
+#include "score.h"
 
 Adafruit_MCP23008 sevenSegs[8];
 
-Bounce leftScoreUpBounce = Bounce(); 
-Bounce leftScoreDownBounce = Bounce(); 
-Bounce rightScoreUpBounce = Bounce(); 
-Bounce rightScoreDownBounce = Bounce(); 
+Score scoreLeft = Score(1, 1);
+Score scoreRight = Score(2, 2);
+
 Bounce timeStartBounce = Bounce(); 
 Bounce timeResetBounce = Bounce(); 
 
-byte scoreLeft = 0;
-byte scoreRight = 0;
-byte period = 1;
+uint8_t period = 1;
 
 Chrono gameChrono(Chrono::MILLIS); 
 
-byte currentDigit = 0;
+uint8_t currentDigit = 0;
 
 void setup() {
   //setupKeys();
@@ -39,25 +37,10 @@ void loop() {
 
 void updateKeys() {
   //Update the debouncing:
-  leftScoreUpBounce.update();
-  leftScoreDownBounce.update();
-  rightScoreUpBounce.update();
-  rightScoreDownBounce.update();
   timeStartBounce.update();
   timeResetBounce.update();
 
-  if (leftScoreUpBounce.fell() && scoreLeft < MAX_SCORE) {
-    scoreLeft++;
-  }
-  if (leftScoreDownBounce.fell() && scoreLeft > 0) {
-    scoreLeft--;
-  }
-  if (rightScoreUpBounce.fell() && scoreRight < MAX_SCORE) {
-    scoreRight++;
-  }
-  if (rightScoreDownBounce.fell() && scoreRight > 0) {
-    scoreRight--;
-  }
+  //Do something about time here...
 }
 
 void updateDigits() {
@@ -68,20 +51,20 @@ void updateDigits() {
     currentDigit = 0;
   }
 
-  byte value;
+  uint8_t value;
 
   switch (currentDigit) {
     case SCORE_LEFT_BIG: 
-      value = getBigDigit(scoreLeft); 
+      value = scoreLeft.getBigDigit(); 
       break;
     case SCORE_LEFT_SMALL: 
-      value = getSmallDigit(scoreLeft); 
+      value = scoreLeft.getSmallDigit(); 
       break;
     case SCORE_RIGHT_BIG: 
-      value = getBigDigit(scoreRight); 
+      value = scoreLeft.getBigDigit(); 
       break;
     case SCORE_RIGHT_SMALL: 
-      value = getSmallDigit(scoreRight); 
+      value = scoreLeft.getSmallDigit(); 
       break;
     case PERIOD: 
       value = period; //This should always be < 9
@@ -106,27 +89,15 @@ unsigned long getGameTime() {
   return gameChrono.elapsed() / 300; //Should be 1000, but for testing make it faster 
 }
 
-byte getSmallDigit(byte input) {
-  while (input > 10) {
-    input = input - 10;
-  }
-  return input;
-}
-
-byte getBigDigit(byte input) {
-  input = input / 10;
-  return getSmallDigit(input);
-}
-
-byte getSmallSecond(unsigned long elapsedTime) {
+uint8_t getSmallSecond(unsigned long elapsedTime) {
   return byte(elapsedTime % 10);
 }
 
-byte getBigSecond(unsigned long elapsedTime) {
+uint8_t getBigSecond(unsigned long elapsedTime) {
   return byte((elapsedTime / 10) % 6);
 }
 
-byte getSmallMinute(unsigned long elapsedTime) {
+uint8_t getSmallMinute(unsigned long elapsedTime) {
   return byte(elapsedTime / 60);
 }
 
