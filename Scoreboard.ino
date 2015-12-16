@@ -9,8 +9,8 @@
 
 Adafruit_MCP23008 sevenSegs[8];
 
-Score scoreLeft = Score(1, 1);
-Score scoreRight = Score(2, 2);
+Score scoreLeft;
+Score scoreRight;
 
 Bounce timeStartBounce = Bounce(); 
 Bounce timeResetBounce = Bounce(); 
@@ -24,6 +24,9 @@ uint8_t currentDigit = 0;
 void setup() {
   //setupKeys();
   setupDigits();
+  
+  scoreLeft.attach(4, 5);
+  scoreRight.attach(6, 7);
 }
 
 void loop() {
@@ -41,6 +44,9 @@ void updateKeys() {
   timeResetBounce.update();
 
   //Do something about time here...
+
+  scoreLeft.update();
+  scoreRight.update();
 }
 
 void updateDigits() {
