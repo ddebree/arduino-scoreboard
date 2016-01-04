@@ -5,21 +5,18 @@
 
 class Score {
   public:
-    void attach(int pinUp, int pinDown);
-
-    void update();
-
+    void inc();
+    void dec();
     void reset();
 
     uint8_t getSmallDigit();
     uint8_t getBigDigit();
 
-  protected:
-    uint8_t _score;
-
     Bounce _upBounce = Bounce();
     Bounce _downBounce = Bounce();
 
+  protected:
+    uint8_t _score;
 };
 
 #endif

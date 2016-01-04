@@ -1,28 +1,13 @@
 #include "score.h"
 
-#include "defines.h"
-#include "Arduino.h"
-
-void Score::attach(int pinUp, int pinDown) {
-  pinMode(pinUp, INPUT_PULLUP);
-  pinMode(pinDown, INPUT_PULLUP);
-  
-  _upBounce.attach(pinUp);
-  _downBounce.attach(pinDown);
-  
-  _upBounce.interval(KEY_DEBOUNCE_INTERVAL); // interval in ms
-  _downBounce.interval(KEY_DEBOUNCE_INTERVAL); // interval in ms 
-}
-
-void Score::update() {
-  //Update the debouncing:
-  _upBounce.update();
-  _downBounce.update();
-
-  if (_upBounce.fell() && _score < 50) {
+void Score::inc() {
+  if (_score < 50) {
     _score++;
   }
-  if (_downBounce.fell() && _score > 0) {
+}
+
+void Score::dec() {
+  if (_score > 0) {
     _score--;
   }
 }

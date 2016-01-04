@@ -13,7 +13,7 @@ Score scoreLeft;
 Score scoreRight;
 
 Bounce timeStartBounce = Bounce(); 
-Bounce timeResetBounce = Bounce(); 
+Bounce resetBounce = Bounce(); 
 
 uint8_t period = 1;
 
@@ -22,15 +22,22 @@ Chrono gameChrono(Chrono::MILLIS);
 uint8_t currentDigit = 0;
 
 void setup() {
-  //setupKeys();
+  setupKeys();
   setupDigits();
+
+  pinMode(8, OUTPUT);
+  pinMode(9, OUTPUT);
+  pinMode(10, OUTPUT);
+  pinMode(11, OUTPUT);
+
+  digitalWrite(10, LOW);
+  digitalWrite(11, LOW);
+
   
-  scoreLeft.attach(4, 5);
-  scoreRight.attach(6, 7);
 }
 
 void loop() {
-  //updateKeys();
+  updateKeys();
   updateDigits();
 
   if (gameChrono.hasPassed(120000)) {
@@ -41,12 +48,41 @@ void loop() {
 void updateKeys() {
   //Update the debouncing:
   timeStartBounce.update();
-  timeResetBounce.update();
+  resetBounce.update();
 
-  //Do something about time here...
+  if (timeStartBounce.fell()) {
+    if (gameChrono.isRunning()) {
+      gameChrono.stop();
+    } else {
+      gameChrono.resume();
+    }
+  }
+  if (resetBounce.read()) {
+    digitalWrite(8, LOW);
+  } else {
+    digitalWrite(8, HIGH);
+  }
+  if (resetBounce.fell()) {
+    //TODO
+  }
 
-  scoreLeft.update();
-  scoreRight.update();
+  scoreLeft._upBounce.update();
+  scoreLeft._downBounce.update();
+  scoreRight._upBounce.update();
+  scoreRight._downBounce.update();
+
+  if (scoreLeft._upBounce.fell()) {
+    scoreLeft.inc();
+  }
+  if (scoreLeft._downBounce.fell()) {
+    scoreLeft.dec();
+  }
+  if (scoreRight._upBounce.fell()) {
+    scoreRight.inc();
+  }
+  if (scoreRight._downBounce.fell()) {
+    scoreRight.dec();
+  }
 }
 
 void updateDigits() {
@@ -67,10 +103,10 @@ void updateDigits() {
       value = scoreLeft.getSmallDigit(); 
       break;
     case SCORE_RIGHT_BIG: 
-      value = scoreLeft.getBigDigit(); 
+      value = scoreRight.getBigDigit(); 
       break;
     case SCORE_RIGHT_SMALL: 
-      value = scoreLeft.getSmallDigit(); 
+      value = scoreRight.getSmallDigit(); 
       break;
     case PERIOD: 
       value = period; //This should always be < 9
@@ -92,7 +128,10 @@ void updateDigits() {
 }
 
 unsigned long getGameTime() {
-  return gameChrono.elapsed() / 300; //Should be 1000, but for testing make it faster 
+  long scale = 300;
+  long timeRemaining = /*600000L - */gameChrono.elapsed();
+  
+  return timeRemaining / scale; //Should be 1000, but for testing make it faster 
 }
 
 uint8_t getSmallSecond(unsigned long elapsedTime) {
@@ -117,28 +156,26 @@ void setupDigits() {
 }
 
 void setupKeys() {
-  /*
-  leftScoreUpBounce.attach();
-  leftScoreDownBounce.attach();
-  rightScoreUpBounce.attach();
-  rightScoreDownBounce.attach();
-  timeStartBounce.attach();
-  timeResetBounce.attach();
+  pinMode(BUTTON_PIN_LEFT_UP, INPUT_PULLUP);
+  pinMode(BUTTON_PIN_LEFT_DOWN, INPUT_PULLUP);
+  pinMode(BUTTON_PIN_RIGHT_UP, INPUT_PULLUP);
+  pinMode(BUTTON_PIN_RIGHT_DOWN, INPUT_PULLUP);
+  pinMode(BUTTON_PIN_START, INPUT_PULLUP);
+  pinMode(BUTTON_PIN_RESET, INPUT_PULLUP);
 
+  scoreLeft._upBounce.attach(BUTTON_PIN_LEFT_UP);
+  scoreLeft._downBounce.attach(BUTTON_PIN_LEFT_DOWN);
+  scoreRight._upBounce.attach(BUTTON_PIN_RIGHT_UP);
+  scoreRight._downBounce.attach(BUTTON_PIN_RIGHT_DOWN);
+  timeStartBounce.attach(BUTTON_PIN_START);
+  resetBounce.attach(BUTTON_PIN_RESET);
 
-  
-  // Setup the first button with an internal pull-up :
-  pinMode(BUTTON_PIN_1,INPUT_PULLUP);
-  // After setting up the button, setup the Bounce instance :
-  debouncer1.attach(BUTTON_PIN_1);
-  debouncer1.interval(KEY_DEBOUNCE_INTERVAL); // interval in ms
-  
-   // Setup the second button with an internal pull-up :
-  pinMode(BUTTON_PIN_2,INPUT_PULLUP);
-  // After setting up the button, setup the Bounce instance :
-  debouncer2.attach(BUTTON_PIN_2);
-  debouncer2.interval(KEY_DEBOUNCE_INTERVAL); // interval in ms
-  */
+  scoreLeft._upBounce.interval(KEY_DEBOUNCE_INTERVAL); // interval in ms
+  scoreLeft._downBounce.interval(KEY_DEBOUNCE_INTERVAL); // interval in ms 
+  scoreRight._upBounce.interval(KEY_DEBOUNCE_INTERVAL); // interval in ms
+  scoreRight._downBounce.interval(KEY_DEBOUNCE_INTERVAL); // interval in ms 
+  timeStartBounce.interval(KEY_DEBOUNCE_INTERVAL); // interval in ms
+  resetBounce.interval(KEY_DEBOUNCE_INTERVAL); // interval in ms 
 }
 
 uint8_t decodeDigit(uint8_t input) {
