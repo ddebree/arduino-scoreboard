@@ -14,9 +14,6 @@ class Score {
     void dec();
     void reset();
 
-    uint8_t getSmallDigit();
-    uint8_t getBigDigit();
-
   protected:
     uint8_t _score;
     SevenSeg _bigSevenSeg;

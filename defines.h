@@ -1,6 +1,3 @@
-
-#define MAX_SCORE 50
-
 #define KEY_DEBOUNCE_INTERVAL 50
 
 #define DIGIT_TOP 0b00000001

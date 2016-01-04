@@ -10,12 +10,12 @@ class DownTimer {
   public:
     void attach(uint8_t smallMinuteAddress, uint8_t bigSecondAddress, uint8_t smallSecondAddress);
     void updateDigits(uint8_t pwmSize, uint8_t currentAddress);
+
+    void startStop();
   
     unsigned long getGameTime();
-    uint8_t getSmallSecond(unsigned long elapsedTime);
-    uint8_t getBigSecond(unsigned long elapsedTime);
-    uint8_t getSmallMinute(unsigned long elapsedTime);
 
+    uint8_t _bigMinute;
     SevenSeg _smallMinute;
     SevenSeg _bigSecond;
     SevenSeg _smallSecond;

@@ -41,10 +41,6 @@ void setup() {
 void loop() {
   updateKeys();
   updateDigits();
-
-  if (countDownTimer._chrono.hasPassed(120000)) {
-    countDownTimer._chrono.restart();
-  }
 }
 
 void updateKeys() {
@@ -57,11 +53,7 @@ void updateKeys() {
   resetBounce.update();
 
   if (timeStartBounce.fell()) {
-    if (countDownTimer._chrono.isRunning()) {
-      countDownTimer._chrono.stop();
-    } else {
-      countDownTimer._chrono.resume();
-    }
+    countDownTimer.startStop();
   }
   if (resetBounce.read()) {
     digitalWrite(8, LOW);
