@@ -24,6 +24,7 @@ Bounce timeStartBounce = Bounce();
 Bounce resetBounce = Bounce(); 
 
 uint8_t currentDigit = 0;
+uint8_t pwmWidth = 1;
 
 void setup() {
   setupKeys();
@@ -84,10 +85,10 @@ void updateDigits() {
     currentDigit = 0;
   }
 
-  scoreLeft.updateDigits(1, currentDigit);
-  scoreRight.updateDigits(1, currentDigit);
-  countDownTimer.updateDigits(1, currentDigit);
-  periodSevenSeg.updateDigit(1, currentDigit);
+  scoreLeft.updateDigits(pwmWidth, currentDigit);
+  scoreRight.updateDigits(pwmWidth, currentDigit);
+  countDownTimer.updateDigits(pwmWidth, currentDigit);
+  periodSevenSeg.updateDigit(pwmWidth, currentDigit);
 }
 
 void setupDigits() {
