@@ -5,9 +5,10 @@
 #include <LightChrono.h>
 
 #include "defines.h"
+#include "sevenseg.h"
 #include "score.h"
 
-Adafruit_MCP23008 sevenSegs[8];
+SevenSeg sevenSegDigits[8];
 
 Score scoreLeft;
 Score scoreRight;
@@ -36,8 +37,6 @@ void setup() {
 
   digitalWrite(10, LOW);
   digitalWrite(11, LOW);
-
-  
 }
 
 void loop() {
@@ -89,8 +88,6 @@ void updateKeys() {
 }
 
 void updateDigits() {
-  sevenSegs[currentDigit].writeGPIO(0);
-  
   currentDigit++;
   if (currentDigit >= 8) {
     currentDigit = 0;
@@ -126,8 +123,11 @@ void updateDigits() {
     default:
       value = 99;
   }
-
-  sevenSegs[currentDigit].writeGPIO(decodeDigit(value));
+  sevenSegDigits[currentDigit].setValue(value);
+  
+  for (uint8_t i = 0; i < 8; i++) {
+    sevenSegDigits[i].updateDigit(i);
+  }
 }
 
 unsigned long getGameTime() {
@@ -151,10 +151,7 @@ uint8_t getSmallMinute(unsigned long elapsedTime) {
 
 void setupDigits() {
   for (uint8_t i = 0; i < 8; i++) {
-    sevenSegs[i].begin(i);
-    for (uint8_t j = 0; j < 8; j++) {
-      sevenSegs[i].pinMode(j, OUTPUT);
-    }
+    sevenSegDigits[i].attach(i);
   }
 }
 
@@ -179,20 +176,4 @@ void setupKeys() {
   scoreRightDownBounce.interval(KEY_DEBOUNCE_INTERVAL); // interval in ms 
   timeStartBounce.interval(KEY_DEBOUNCE_INTERVAL); // interval in ms
   resetBounce.interval(KEY_DEBOUNCE_INTERVAL); // interval in ms 
-}
-
-uint8_t decodeDigit(uint8_t input) {
-  switch (input) {
-    case 0: return DIGIT_0;
-    case 1: return DIGIT_1;
-    case 2: return DIGIT_2;
-    case 3: return DIGIT_3;
-    case 4: return DIGIT_4;
-    case 5: return DIGIT_5;
-    case 6: return DIGIT_6;
-    case 7: return DIGIT_7;
-    case 8: return DIGIT_8;
-    case 9: return DIGIT_9;
-    default: return 0;
-  }    
 }
