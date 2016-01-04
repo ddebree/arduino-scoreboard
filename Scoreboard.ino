@@ -12,6 +12,10 @@ Adafruit_MCP23008 sevenSegs[8];
 Score scoreLeft;
 Score scoreRight;
 
+Bounce scoreLeftUpBounce = Bounce();
+Bounce scoreLeftDownBounce = Bounce();
+Bounce scoreRightUpBounce = Bounce();
+Bounce scoreRightDownBounce = Bounce();
 Bounce timeStartBounce = Bounce(); 
 Bounce resetBounce = Bounce(); 
 
@@ -47,6 +51,10 @@ void loop() {
 
 void updateKeys() {
   //Update the debouncing:
+  scoreLeftUpBounce.update();
+  scoreLeftDownBounce.update();
+  scoreRightUpBounce.update();
+  scoreRightDownBounce.update();
   timeStartBounce.update();
   resetBounce.update();
 
@@ -66,21 +74,16 @@ void updateKeys() {
     //TODO
   }
 
-  scoreLeft._upBounce.update();
-  scoreLeft._downBounce.update();
-  scoreRight._upBounce.update();
-  scoreRight._downBounce.update();
-
-  if (scoreLeft._upBounce.fell()) {
+  if (scoreLeftUpBounce.fell()) {
     scoreLeft.inc();
   }
-  if (scoreLeft._downBounce.fell()) {
+  if (scoreLeftDownBounce.fell()) {
     scoreLeft.dec();
   }
-  if (scoreRight._upBounce.fell()) {
+  if (scoreRightUpBounce.fell()) {
     scoreRight.inc();
   }
-  if (scoreRight._downBounce.fell()) {
+  if (scoreRightDownBounce.fell()) {
     scoreRight.dec();
   }
 }
@@ -163,17 +166,17 @@ void setupKeys() {
   pinMode(BUTTON_PIN_START, INPUT_PULLUP);
   pinMode(BUTTON_PIN_RESET, INPUT_PULLUP);
 
-  scoreLeft._upBounce.attach(BUTTON_PIN_LEFT_UP);
-  scoreLeft._downBounce.attach(BUTTON_PIN_LEFT_DOWN);
-  scoreRight._upBounce.attach(BUTTON_PIN_RIGHT_UP);
-  scoreRight._downBounce.attach(BUTTON_PIN_RIGHT_DOWN);
+  scoreLeftUpBounce.attach(BUTTON_PIN_LEFT_UP);
+  scoreLeftDownBounce.attach(BUTTON_PIN_LEFT_DOWN);
+  scoreRightUpBounce.attach(BUTTON_PIN_RIGHT_UP);
+  scoreRightDownBounce.attach(BUTTON_PIN_RIGHT_DOWN);
   timeStartBounce.attach(BUTTON_PIN_START);
   resetBounce.attach(BUTTON_PIN_RESET);
 
-  scoreLeft._upBounce.interval(KEY_DEBOUNCE_INTERVAL); // interval in ms
-  scoreLeft._downBounce.interval(KEY_DEBOUNCE_INTERVAL); // interval in ms 
-  scoreRight._upBounce.interval(KEY_DEBOUNCE_INTERVAL); // interval in ms
-  scoreRight._downBounce.interval(KEY_DEBOUNCE_INTERVAL); // interval in ms 
+  scoreLeftUpBounce.interval(KEY_DEBOUNCE_INTERVAL); // interval in ms
+  scoreLeftDownBounce.interval(KEY_DEBOUNCE_INTERVAL); // interval in ms 
+  scoreRightUpBounce.interval(KEY_DEBOUNCE_INTERVAL); // interval in ms
+  scoreRightDownBounce.interval(KEY_DEBOUNCE_INTERVAL); // interval in ms 
   timeStartBounce.interval(KEY_DEBOUNCE_INTERVAL); // interval in ms
   resetBounce.interval(KEY_DEBOUNCE_INTERVAL); // interval in ms 
 }
