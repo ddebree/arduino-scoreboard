@@ -2,13 +2,16 @@
 #include <Bounce2.h>
 #include <Adafruit_MCP23008.h>
 #include <Chrono.h>
-#include <LightChrono.h>
 
 #include "defines.h"
+
+#include "downtimer.h"
 #include "sevenseg.h"
 #include "score.h"
 
-SevenSeg sevenSegDigits[8];
+SevenSeg periodSevenSeg;
+
+DownTimer countDownTimer;
 
 Score scoreLeft;
 Score scoreRight;
@@ -19,10 +22,6 @@ Bounce scoreRightUpBounce = Bounce();
 Bounce scoreRightDownBounce = Bounce();
 Bounce timeStartBounce = Bounce(); 
 Bounce resetBounce = Bounce(); 
-
-uint8_t period = 1;
-
-Chrono gameChrono(Chrono::MILLIS); 
 
 uint8_t currentDigit = 0;
 
@@ -43,8 +42,8 @@ void loop() {
   updateKeys();
   updateDigits();
 
-  if (gameChrono.hasPassed(120000)) {
-    gameChrono.restart();
+  if (countDownTimer._chrono.hasPassed(120000)) {
+    countDownTimer._chrono.restart();
   }
 }
 
@@ -58,10 +57,10 @@ void updateKeys() {
   resetBounce.update();
 
   if (timeStartBounce.fell()) {
-    if (gameChrono.isRunning()) {
-      gameChrono.stop();
+    if (countDownTimer._chrono.isRunning()) {
+      countDownTimer._chrono.stop();
     } else {
-      gameChrono.resume();
+      countDownTimer._chrono.resume();
     }
   }
   if (resetBounce.read()) {
@@ -93,66 +92,17 @@ void updateDigits() {
     currentDigit = 0;
   }
 
-  uint8_t value;
-
-  switch (currentDigit) {
-    case SCORE_LEFT_BIG: 
-      value = scoreLeft.getBigDigit(); 
-      break;
-    case SCORE_LEFT_SMALL: 
-      value = scoreLeft.getSmallDigit(); 
-      break;
-    case SCORE_RIGHT_BIG: 
-      value = scoreRight.getBigDigit(); 
-      break;
-    case SCORE_RIGHT_SMALL: 
-      value = scoreRight.getSmallDigit(); 
-      break;
-    case PERIOD: 
-      value = period; //This should always be < 9
-      break;
-    case TIME_SECOND_BIG: 
-      value = getBigSecond(getGameTime());
-      break;
-    case TIME_SECOND_SMALL: 
-      value = getSmallSecond(getGameTime());
-      break;
-    case TIME_MINUTE_SMALL: 
-      value = getSmallMinute(getGameTime());
-      break;
-    default:
-      value = 99;
-  }
-  sevenSegDigits[currentDigit].setValue(value);
-  
-  for (uint8_t i = 0; i < 8; i++) {
-    sevenSegDigits[i].updateDigit(i);
-  }
-}
-
-unsigned long getGameTime() {
-  long scale = 300;
-  long timeRemaining = /*600000L - */gameChrono.elapsed();
-  
-  return timeRemaining / scale; //Should be 1000, but for testing make it faster 
-}
-
-uint8_t getSmallSecond(unsigned long elapsedTime) {
-  return byte(elapsedTime % 10);
-}
-
-uint8_t getBigSecond(unsigned long elapsedTime) {
-  return byte((elapsedTime / 10) % 6);
-}
-
-uint8_t getSmallMinute(unsigned long elapsedTime) {
-  return byte(elapsedTime / 60);
+  scoreLeft.updateDigits(1, currentDigit);
+  scoreRight.updateDigits(1, currentDigit);
+  countDownTimer.updateDigits(1, currentDigit);
+  periodSevenSeg.updateDigit(1, currentDigit);
 }
 
 void setupDigits() {
-  for (uint8_t i = 0; i < 8; i++) {
-    sevenSegDigits[i].attach(i);
-  }
+  scoreLeft.attach(SCORE_LEFT_BIG, SCORE_LEFT_SMALL);
+  scoreRight.attach(SCORE_RIGHT_BIG, SCORE_RIGHT_SMALL);
+  periodSevenSeg.attach(PERIOD);
+  countDownTimer.attach(TIME_MINUTE_SMALL, TIME_SECOND_BIG, TIME_SECOND_SMALL);
 }
 
 void setupKeys() {

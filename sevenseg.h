@@ -8,7 +8,8 @@ class SevenSeg {
   public:
     void attach(uint8_t address);
     void setValue(uint8_t value);
-    void updateDigit(uint8_t address);
+    void updateDigit(uint8_t pwmSize, uint8_t currentAddress);
+    uint8_t getValue();
 
   protected:
     uint8_t decodeDigit(uint8_t input);

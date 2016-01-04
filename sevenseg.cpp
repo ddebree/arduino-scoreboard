@@ -10,8 +10,8 @@ void SevenSeg::attach(uint8_t address) {
   }
 }
 
-void SevenSeg::updateDigit(uint8_t address) {
-  if (address == _address) {
+void SevenSeg::updateDigit(uint8_t pwmSize, uint8_t currentAddress) {
+  if (currentAddress == _address) {
     _visible = true;
     _digit.writeGPIO(decodeDigit(_value));
   } else {
@@ -22,6 +22,10 @@ void SevenSeg::updateDigit(uint8_t address) {
 
 void SevenSeg::setValue(uint8_t value) {
   _value = value;
+}
+
+uint8_t SevenSeg::getValue() {
+  return _value;
 }
 
 uint8_t SevenSeg::decodeDigit(uint8_t input) {
