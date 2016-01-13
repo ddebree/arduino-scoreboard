@@ -2,20 +2,23 @@
 
 #include "defines.h"
 
-void DownTimer::attach(uint8_t smallMinuteAddress, uint8_t bigSecondAddress, uint8_t smallSecondAddress) {
-  _smallMinute.attach(smallMinuteAddress);
-  _bigSecond.attach(bigSecondAddress);
-  _smallSecond.attach(smallSecondAddress);
+void DownTimer::attach() {
+  _smallMinute.attach(TIME_MINUTE_SMALL);
+  _bigSecond.attach(TIME_SECOND_BIG);
+  _smallSecond.attach(TIME_SECOND_SMALL);
+
+  pinMode(PIN_DOTS, OUTPUT);
+  pinMode(PIN_BIG_MINUTE, OUTPUT);
+
+  digitalWrite(PIN_DOTS, LOW);
+  digitalWrite(PIN_BIG_MINUTE, LOW);
 }
 
 void DownTimer::updateDigits(uint8_t pwmSize, uint8_t currentAddress) {
   unsigned long gameTime = getGameTime();
 
   unsigned long timeToShow = 0;
-  if (gameTime > _gameLength) {
-    timeToShow = 0;
-    _chrono.stop();
-  } else {
+  if (gameTime < _gameLength) {
     timeToShow = _gameLength - gameTime;
   }
   
@@ -59,9 +62,7 @@ void DownTimer::updateDigits(uint8_t pwmSize, uint8_t currentAddress) {
     digitalWrite(PIN_DOTS, HIGH);
   } else {
     //digitalWrite(PIN_DOTS, LOW);
-  }
-
-  
+  }  
 }
 
 void DownTimer::startStop() {
@@ -72,8 +73,29 @@ void DownTimer::startStop() {
     }
 }
 
+bool DownTimer::isRunning() {
+  return _chrono.isRunning();
+}
+
+bool DownTimer::isJustPastEndTime() {
+  //We cant be just past end time if we arent running... 
+  if ( ! _chrono.isRunning()) {
+    return false;
+  }
+  unsigned long gameTime = getGameTime();
+  if (gameTime > _gameLength) {
+    _chrono.stop();
+    return true;
+  }
+  return false;
+}
+
+void DownTimer::restart() {
+  _chrono.restart();
+}
+
 unsigned long DownTimer::getGameTime() {
-  return 3L * _chrono.elapsed();
+  return /*3L * */  _chrono.elapsed();
   
   //return timeRemaining / scale; //Should be 1000, but for testing make it faster 
 }

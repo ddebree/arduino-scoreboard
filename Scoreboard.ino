@@ -3,17 +3,18 @@
 #include <Adafruit_MCP23008.h>
 #include <Chrono.h>
 
-
 #include "defines.h"
 
 #include "downtimer.h"
 #include "sevenseg.h"
 #include "score.h"
+#include "buzzer.h"
 
 DownTimer countDownTimer;
 Score scoreLeft;
 Score scoreRight;
 SevenSeg periodSevenSeg;
+Buzzer buzzer = Buzzer();
 
 Bounce scoreLeftUpBounce = Bounce();
 Bounce scoreLeftDownBounce = Bounce();
@@ -28,23 +29,21 @@ uint8_t pwmWidth = 1;
 uint8_t loopcount = 0;
 bool debug = false;
 
-
 void setup() {
   setupKeys();
   setupDigits();
-
-  pinMode(8, OUTPUT);
-  pinMode(9, OUTPUT);
-  pinMode(10, OUTPUT);
-  pinMode(11, OUTPUT);
-
-  digitalWrite(10, LOW);
-  digitalWrite(11, LOW);
+  buzzer.attach();
+  periodSevenSeg.setValue(1);
 }
 
 void loop() {
   updateKeys();
   updateDigits();
+  buzzer.update();
+  if (countDownTimer.isJustPastEndTime()) {
+    buzzer.buzzerOn(true, 250);
+  }
+  
   if (debug) {
     loopcount++;
     if (loopcount == 0) {
@@ -66,8 +65,13 @@ void updateKeys() {
   if (timeStartBounce.fell()) {
     countDownTimer.startStop();
   }
-  if (resetBounce.fell() && ! countDownTimer._chrono.isRunning()) {
-    countDownTimer._chrono.restart();
+  if (resetBounce.fell() && ! countDownTimer.isRunning()) {
+    countDownTimer.restart();
+    if (periodSevenSeg.getValue() <= 1) {
+      periodSevenSeg.setValue(2);
+    } else {
+      periodSevenSeg.setValue(1);
+    }
   }
 
   if (scoreLeftUpBounce.fell()) {
@@ -97,10 +101,10 @@ void updateDigits() {
 }
 
 void setupDigits() {
-  scoreLeft.attach(SCORE_LEFT_BIG, SCORE_LEFT_SMALL);
-  scoreRight.attach(SCORE_RIGHT_BIG, SCORE_RIGHT_SMALL);
+  scoreLeft.attach(SCORE_LEFT_BIG, SCORE_LEFT_SMALL, false);
+  scoreRight.attach(SCORE_RIGHT_BIG, SCORE_RIGHT_SMALL, true);
   periodSevenSeg.attach(PERIOD);
-  countDownTimer.attach(TIME_MINUTE_SMALL, TIME_SECOND_BIG, TIME_SECOND_SMALL);
+  countDownTimer.attach();
 }
 
 void setupKeys() {

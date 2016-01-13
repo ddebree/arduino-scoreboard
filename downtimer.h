@@ -8,14 +8,18 @@
 
 class DownTimer {
   public:
-    void attach(uint8_t smallMinuteAddress, uint8_t bigSecondAddress, uint8_t smallSecondAddress);
+    void attach();
     void updateDigits(uint8_t pwmSize, uint8_t currentAddress);
 
     void startStop();
-  
+    void restart();
+    bool isRunning();
+    bool isJustPastEndTime();
+
+  protected:
     unsigned long getGameTime();
 
-    unsigned long _gameLength = 12L * 60L * 1000L;
+    unsigned long _gameLength = 10L * 60L * 1000L;
 
     uint8_t _bigMinute;
     SevenSeg _smallMinute;
