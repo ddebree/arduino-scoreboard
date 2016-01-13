@@ -3,18 +3,17 @@
 #include <Adafruit_MCP23008.h>
 #include <Chrono.h>
 
+
 #include "defines.h"
 
 #include "downtimer.h"
 #include "sevenseg.h"
 #include "score.h"
 
-SevenSeg periodSevenSeg;
-
 DownTimer countDownTimer;
-
 Score scoreLeft;
 Score scoreRight;
+SevenSeg periodSevenSeg;
 
 Bounce scoreLeftUpBounce = Bounce();
 Bounce scoreLeftDownBounce = Bounce();
@@ -25,6 +24,10 @@ Bounce resetBounce = Bounce();
 
 uint8_t currentDigit = 0;
 uint8_t pwmWidth = 1;
+
+uint8_t loopcount = 0;
+bool debug = false;
+
 
 void setup() {
   setupKeys();
@@ -42,6 +45,13 @@ void setup() {
 void loop() {
   updateKeys();
   updateDigits();
+  if (debug) {
+    loopcount++;
+    if (loopcount == 0) {
+      Serial.print("Loop time ");
+      Serial.println(millis());
+    }
+  }
 }
 
 void updateKeys() {
@@ -56,13 +66,8 @@ void updateKeys() {
   if (timeStartBounce.fell()) {
     countDownTimer.startStop();
   }
-  if (resetBounce.read()) {
-    digitalWrite(8, LOW);
-  } else {
-    digitalWrite(8, HIGH);
-  }
-  if (resetBounce.fell()) {
-    //TODO
+  if (resetBounce.fell() && ! countDownTimer._chrono.isRunning()) {
+    countDownTimer._chrono.restart();
   }
 
   if (scoreLeftUpBounce.fell()) {

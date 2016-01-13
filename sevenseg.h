@@ -13,6 +13,8 @@ class SevenSeg {
 
   protected:
     uint8_t decodeDigit(uint8_t input);
+    void showDigit();
+    void hideDigit();
     
     uint8_t _address;
     uint8_t _value;

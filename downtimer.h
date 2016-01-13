@@ -15,6 +15,8 @@ class DownTimer {
   
     unsigned long getGameTime();
 
+    unsigned long _gameLength = 12L * 60L * 1000L;
+
     uint8_t _bigMinute;
     SevenSeg _smallMinute;
     SevenSeg _bigSecond;

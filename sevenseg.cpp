@@ -3,7 +3,7 @@
 #include "defines.h"
 
 void SevenSeg::attach(uint8_t address) {
-  _address = address;    
+  _address = address;
   _digit.begin(address);
   for (uint8_t i = 0; i < 8; i++) {
     _digit.pinMode(i, OUTPUT);
@@ -11,21 +11,35 @@ void SevenSeg::attach(uint8_t address) {
 }
 
 void SevenSeg::updateDigit(uint8_t pwmSize, uint8_t currentAddress) {
-  if (currentAddress == _address) {
-    _visible = true;
-    _digit.writeGPIO(decodeDigit(_value));
-  } else {
-    _visible = false;
-    _digit.writeGPIO(0);
+  if (_visible) {
+    //Figure out when to turn off:
+    if (currentAddress != _address) {
+      //hideDigit();
+    }
+  } else if (currentAddress == _address) {
+    showDigit();
   }
 }
 
 void SevenSeg::setValue(uint8_t value) {
   _value = value;
+  if (_visible) {
+    showDigit();
+  }
 }
 
 uint8_t SevenSeg::getValue() {
   return _value;
+}
+
+void SevenSeg::showDigit() {
+  _visible = true;
+  _digit.writeGPIO(decodeDigit(_value));
+}
+
+void SevenSeg::hideDigit() {
+  _visible = false;
+  _digit.writeGPIO(0);
 }
 
 uint8_t SevenSeg::decodeDigit(uint8_t input) {
@@ -41,5 +55,5 @@ uint8_t SevenSeg::decodeDigit(uint8_t input) {
     case 8: return DIGIT_8;
     case 9: return DIGIT_9;
     default: return 0;
-  }    
+  }
 }
