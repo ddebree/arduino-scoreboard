@@ -6,27 +6,32 @@
 
 #include "sevenseg.h"
 
-class DownTimer {
+class DownTimer : public Chrono {
   public:
     void attach();
     void updateDigits(uint8_t pwmSize, uint8_t currentAddress);
+    void setFastTime();
+
+    unsigned long elapsed() const;
 
     void startStop();
-    void restart();
-    bool isRunning();
-    bool isJustPastEndTime();
+    void reset();
+    bool onPeriodComplete();
+
+    bool isAfterPeriod();
+
+    void incGameTime();
+    void decGameTime();
 
   protected:
-    unsigned long getGameTime();
-
-    unsigned long _gameLength = 10L * 60L * 1000L;
+    byte _gameLengthDivide5s;
+    unsigned long _gameLength;
+    bool _fastTime = false;
 
     uint8_t _bigMinute;
     SevenSeg _smallMinute;
     SevenSeg _bigSecond;
     SevenSeg _smallSecond;
-    
-    Chrono _chrono = Chrono(Chrono::MILLIS);
 };
 
 #endif

@@ -1,5 +1,9 @@
 #include "downtimer.h"
 
+#include <EEPROM.h>
+
+#define GAME_LENGTH_ADDRESS 0
+
 #include "defines.h"
 
 void DownTimer::attach() {
@@ -12,14 +16,30 @@ void DownTimer::attach() {
 
   digitalWrite(PIN_DOTS, LOW);
   digitalWrite(PIN_BIG_MINUTE, LOW);
+
+  _gameLengthDivide5s = EEPROM.read(GAME_LENGTH_ADDRESS);
+  _gameLengthDivide5s = 4;
+  _gameLength = _gameLengthDivide5s;
+  _gameLength *= 5000L;
+  reset();
+}
+
+unsigned long DownTimer::elapsed() const {
+  if (_fastTime) {
+    return Chrono::elapsed() << 2;
+  } else {
+    return Chrono::elapsed();
+  }
 }
 
 void DownTimer::updateDigits(uint8_t pwmSize, uint8_t currentAddress) {
-  unsigned long gameTime = getGameTime();
+  unsigned long gameTime = elapsed();
 
   unsigned long timeToShow = 0;
   if (gameTime < _gameLength) {
     timeToShow = _gameLength - gameTime;
+    //This makes it show a little more time to make it finsh exactly on zero
+    timeToShow += 999L;
   }
   
   uint8_t minute10 = 0;
@@ -52,7 +72,7 @@ void DownTimer::updateDigits(uint8_t pwmSize, uint8_t currentAddress) {
   _smallMinute.updateDigit(pwmSize, currentAddress);
   _bigSecond.updateDigit(pwmSize, currentAddress);
   _smallSecond.updateDigit(pwmSize, currentAddress);
-  if (currentAddress == 0 && _bigMinute > 0) {
+  if (/*currentAddress == 0 && */_bigMinute > 0) {
     digitalWrite(PIN_BIG_MINUTE, HIGH);
   } else {
     digitalWrite(PIN_BIG_MINUTE, LOW);
@@ -65,37 +85,51 @@ void DownTimer::updateDigits(uint8_t pwmSize, uint8_t currentAddress) {
   }  
 }
 
+void DownTimer::setFastTime() {
+  _fastTime = true;
+}
+
 void DownTimer::startStop() {
-  if (_chrono.isRunning()) {
-      _chrono.stop();
+  if (isRunning()) {
+      stop();
     } else {
-      _chrono.resume();
+      resume();
     }
 }
 
-bool DownTimer::isRunning() {
-  return _chrono.isRunning();
+bool DownTimer::isAfterPeriod() {
+  return hasPassed(_gameLength);
 }
 
-bool DownTimer::isJustPastEndTime() {
-  //We cant be just past end time if we arent running... 
-  if ( ! _chrono.isRunning()) {
-    return false;
-  }
-  unsigned long gameTime = getGameTime();
-  if (gameTime > _gameLength) {
-    _chrono.stop();
+bool DownTimer::onPeriodComplete() {
+  if (isRunning() && isAfterPeriod()) {
+    stop();
     return true;
   }
   return false;
 }
 
-void DownTimer::restart() {
-  _chrono.restart();
+void DownTimer::reset() {
+  _startTime = _offset = 0;
+  _isRunning = false;
 }
 
-unsigned long DownTimer::getGameTime() {
-  return /*3L * */  _chrono.elapsed();
-  
-  //return timeRemaining / scale; //Should be 1000, but for testing make it faster 
+void DownTimer::incGameTime() {
+  if (! isRunning()) {
+    if (_gameLengthDivide5s < 240) {
+      _gameLengthDivide5s++;
+      _gameLength += 5000L;
+      EEPROM.write(GAME_LENGTH_ADDRESS, _gameLengthDivide5s);
+    }
+  }
+}
+
+void DownTimer::decGameTime() {
+  if (! isRunning()) {
+    if (_gameLengthDivide5s > 12) {
+      _gameLengthDivide5s--;
+      _gameLength = _gameLength - 5000L;
+      EEPROM.write(GAME_LENGTH_ADDRESS, _gameLengthDivide5s);
+    }
+  }
 }

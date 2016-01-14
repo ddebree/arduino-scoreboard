@@ -2,6 +2,7 @@
 #include <Bounce2.h>
 #include <Adafruit_MCP23008.h>
 #include <Chrono.h>
+#include <EEPROM.h>
 
 #include "defines.h"
 
@@ -26,30 +27,26 @@ Bounce resetBounce = Bounce();
 uint8_t currentDigit = 0;
 uint8_t pwmWidth = 1;
 
-uint8_t loopcount = 0;
-bool debug = false;
-
 void setup() {
   setupKeys();
   setupDigits();
   buzzer.attach();
   periodSevenSeg.setValue(1);
+
+  //Make the timer run fast for testing...
+  delay(KEY_DEBOUNCE_INTERVAL + 1);
+  if ( ! resetBounce.read()) {
+    countDownTimer.setFastTime();
+    buzzer.buzzerOn(false, 100);
+  }
 }
 
 void loop() {
   updateKeys();
   updateDigits();
   buzzer.update();
-  if (countDownTimer.isJustPastEndTime()) {
+  if (countDownTimer.onPeriodComplete()) {
     buzzer.buzzerOn(true, 250);
-  }
-  
-  if (debug) {
-    loopcount++;
-    if (loopcount == 0) {
-      Serial.print("Loop time ");
-      Serial.println(millis());
-    }
   }
 }
 
@@ -62,29 +59,47 @@ void updateKeys() {
   timeStartBounce.update();
   resetBounce.update();
 
-  if (timeStartBounce.fell()) {
-    countDownTimer.startStop();
-  }
-  if (resetBounce.fell() && ! countDownTimer.isRunning()) {
-    countDownTimer.restart();
-    if (periodSevenSeg.getValue() <= 1) {
-      periodSevenSeg.setValue(2);
+  if (timeStartBounce.rose()) {
+    if ( ! resetBounce.read()) {
+      countDownTimer.reset();
+    } else if (countDownTimer.isAfterPeriod()) {
+      countDownTimer.reset();
+      alternatePeriod();
     } else {
-      periodSevenSeg.setValue(1);
+      countDownTimer.startStop();
     }
   }
+  if (resetBounce.rose() && ! countDownTimer.isRunning()) {
+    alternatePeriod();
+  }
 
-  if (scoreLeftUpBounce.fell()) {
-    scoreLeft.inc();
+  if (scoreLeftUpBounce.rose()) {
+    if (resetBounce.read()) {
+      scoreLeft.inc();
+    } else {
+      countDownTimer.incGameTime();
+    }
   }
-  if (scoreLeftDownBounce.fell()) {
-    scoreLeft.dec();
+  if (scoreLeftDownBounce.rose()) {
+    if (resetBounce.read()) {
+      scoreLeft.dec();
+    } else {
+      countDownTimer.decGameTime();
+    }
   }
-  if (scoreRightUpBounce.fell()) {
+  if (scoreRightUpBounce.rose()) {
     scoreRight.inc();
   }
-  if (scoreRightDownBounce.fell()) {
+  if (scoreRightDownBounce.rose()) {
     scoreRight.dec();
+  }
+}
+
+void alternatePeriod() {
+  if (periodSevenSeg.getValue() <= 1) {
+    periodSevenSeg.setValue(2);
+  } else {
+    periodSevenSeg.setValue(1);
   }
 }
 
