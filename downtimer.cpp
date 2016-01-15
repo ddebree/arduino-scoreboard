@@ -18,7 +18,7 @@ void DownTimer::attach() {
   digitalWrite(PIN_BIG_MINUTE, LOW);
 
   _gameLengthDivide5s = EEPROM.read(GAME_LENGTH_ADDRESS);
-  _gameLengthDivide5s = 4;
+  //test: _gameLengthDivide5s = 4;
   _gameLength = _gameLengthDivide5s;
   _gameLength *= 5000L;
   reset();
