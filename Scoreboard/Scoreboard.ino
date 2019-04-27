@@ -14,17 +14,25 @@
 DownTimer countDownTimer;
 Score scoreLeft;
 Score scoreRight;
+
+SevenSeg smallMinute;
+SevenSeg bigSecond;
+SevenSeg smallSecond;
+
 SevenSeg periodSevenSeg;
 
 Bounce scoreLeftUpBounce = Bounce();
 Bounce scoreLeftDownBounce = Bounce();
 Bounce scoreRightUpBounce = Bounce();
 Bounce scoreRightDownBounce = Bounce();
-Bounce timeStartBounce = Bounce(); 
-Bounce resetBounce = Bounce(); 
-Bounce shotTimeBounce = Bounce(); 
+Bounce timeStartBounce = Bounce();
+Bounce resetBounce = Bounce();
+Bounce shotTimeBounce = Bounce();
 
 uint8_t currentDigit = 0;
+
+bool _buzzerOn;
+unsigned long _buzzerOffTime;
 
 struct RadioPacket {
     boolean clockRunning;
@@ -43,6 +51,18 @@ void setup() {
   scoreLeft.attach(SCORE_LEFT_BIG, SCORE_LEFT_SMALL, false);
   scoreRight.attach(SCORE_RIGHT_BIG, SCORE_RIGHT_SMALL, true);
   periodSevenSeg.attach(PERIOD);
+  smallMinute.attach(TIME_MINUTE_SMALL);
+  bigSecond.attach(TIME_SECOND_BIG);
+  smallSecond.attach(TIME_SECOND_SMALL);
+
+  pinMode(PIN_DOTS, OUTPUT);
+  pinMode(PIN_BIG_MINUTE, OUTPUT);
+  pinMode(PIN_BUZZER, OUTPUT);
+
+  digitalWrite(PIN_DOTS, HIGH);
+  digitalWrite(PIN_BIG_MINUTE, LOW);
+  digitalWrite(PIN_BUZZER, LOW);
+
   countDownTimer.attach();
 
   periodSevenSeg.setValue(1);
@@ -50,6 +70,7 @@ void setup() {
   //Make the timer run fast for testing...
   delay(KEY_DEBOUNCE_INTERVAL + 1);
   if ( ! resetBounce.read()) {
+    buzzerShort();
     countDownTimer.setFastTime();
   }
   Serial.begin(9600);
@@ -62,11 +83,23 @@ void setup() {
 void loop() {
   //Serial.println("Loop Start");
   updateKeys();
-  
+  updateTimeDisplay();
+
+  if (_buzzerOn) {
+    if (millis() > _buzzerOffTime) {
+      _buzzerOn = false;
+      digitalWrite(PIN_BUZZER, LOW);
+    }
+  }
+
   currentDigit = (currentDigit + 1) % 8;
   scoreLeft.updateDigits(currentDigit);
   scoreRight.updateDigits(currentDigit);
-  countDownTimer.updateDigits(currentDigit);
+
+  smallMinute.updateDigit(currentDigit);
+  bigSecond.updateDigit(currentDigit);
+  smallSecond.updateDigit(currentDigit);
+
   periodSevenSeg.updateDigit(currentDigit);
 
   //We only send the radio data occasionally:
@@ -82,7 +115,7 @@ void loop() {
       radioData.clockVisible = true;
       radioData.currentTime = 0;
     }
-    
+
     radio.send(RADIO_ID, &radioData, sizeof(radioData));
     nextRadioSendTime = millis() + RADIO_SEND_INTERVAL;
   }
@@ -134,7 +167,7 @@ void updateKeys() {
     scoreRight.dec();
   }
   if (shotTimeBounce.rose()) {
-    //TODO: 
+    //TODO:
   }
 }
 
@@ -164,10 +197,64 @@ void setupKeys() {
   shotTimeBounce.attach(BUTTON_PIN_SHOT_CLOCK);
 
   scoreLeftUpBounce.interval(KEY_DEBOUNCE_INTERVAL); // interval in ms
-  scoreLeftDownBounce.interval(KEY_DEBOUNCE_INTERVAL); // interval in ms 
+  scoreLeftDownBounce.interval(KEY_DEBOUNCE_INTERVAL); // interval in ms
   scoreRightUpBounce.interval(KEY_DEBOUNCE_INTERVAL); // interval in ms
-  scoreRightDownBounce.interval(KEY_DEBOUNCE_INTERVAL); // interval in ms 
+  scoreRightDownBounce.interval(KEY_DEBOUNCE_INTERVAL); // interval in ms
   timeStartBounce.interval(KEY_DEBOUNCE_INTERVAL); // interval in ms
   resetBounce.interval(KEY_DEBOUNCE_INTERVAL); // interval in ms
   shotTimeBounce.interval(KEY_DEBOUNCE_INTERVAL); // interval in ms
+}
+
+void updateTimeDisplay() {
+  unsigned long timeToShow = countDownTimer.getGameTimeToShow();
+
+  uint8_t minute10 = 0;
+  uint8_t minute = 0;
+  uint8_t second10 = 0;
+  uint8_t second = 0;
+
+  while (timeToShow >= 600000L) {
+    minute10++;
+    timeToShow = timeToShow - 600000L;
+  }
+  while (timeToShow >= 60000L) {
+    minute++;
+    timeToShow = timeToShow - 60000L;
+  }
+  while (timeToShow >= 10000L) {
+    second10++;
+    timeToShow = timeToShow - 10000L;
+  }
+  while (timeToShow >= 1000L) {
+    second++;
+    timeToShow = timeToShow - 1000L;
+  }
+
+  smallMinute.setValue(minute);
+  bigSecond.setValue(second10);
+  smallSecond.setValue(second);
+
+  if (minute10 > 0) {
+    digitalWrite(PIN_BIG_MINUTE, HIGH);
+  } else {
+    digitalWrite(PIN_BIG_MINUTE, LOW);
+  }
+}
+
+void buzzerShort() {
+  _buzzerOn = true;
+  _buzzerOffTime = millis() + 250;
+  digitalWrite(PIN_BUZZER, HIGH);
+}
+
+void buzzerShortShort() {
+  _buzzerOn = true;
+  _buzzerOffTime = millis() + 250;
+  digitalWrite(PIN_BUZZER, HIGH);
+}
+
+void buzzerLong() {
+  _buzzerOn = true;
+  _buzzerOffTime = millis() + 1000;
+  digitalWrite(PIN_BUZZER, HIGH);
 }

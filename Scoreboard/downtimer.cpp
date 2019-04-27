@@ -7,18 +7,6 @@
 #include "defines.h"
 
 void DownTimer::attach() {
-  _smallMinute.attach(TIME_MINUTE_SMALL);
-  _bigSecond.attach(TIME_SECOND_BIG);
-  _smallSecond.attach(TIME_SECOND_SMALL);
-
-  pinMode(PIN_DOTS, OUTPUT);
-  pinMode(PIN_BIG_MINUTE, OUTPUT);
-  pinMode(PIN_BUZZER, OUTPUT);
-
-  digitalWrite(PIN_DOTS, LOW);
-  digitalWrite(PIN_BIG_MINUTE, LOW);
-  digitalWrite(PIN_BUZZER, LOW);
-
   _gameLengthDivide5s = EEPROM.read(GAME_LENGTH_ADDRESS);
   //test: _gameLengthDivide5s = 4;
   _gameLength = _gameLengthDivide5s;
@@ -49,62 +37,8 @@ unsigned long DownTimer::getShotTimeToShow() {
   return elapsed() - _shotClockStartElapsed;
 }
 
-void DownTimer::updateDigits(uint8_t currentAddress) {
-  unsigned long timeToShow = getGameTimeToShow();
-  
-  uint8_t minute10 = 0;
-  uint8_t minute = 0;
-  uint8_t second10 = 0;
-  uint8_t second = 0;
-
-  while (timeToShow >= 600000L) {
-    minute10++;
-    timeToShow = timeToShow - 600000L;
-  }
-  while (timeToShow >= 60000L) {
-    minute++;
-    timeToShow = timeToShow - 60000L;
-  }
-  while (timeToShow >= 10000L) {
-    second10++;
-    timeToShow = timeToShow - 10000L;
-  }
-  while (timeToShow >= 1000L) {
-    second++;
-    timeToShow = timeToShow - 1000L;
-  }
-
-  _bigMinute = minute10;
-  _smallMinute.setValue(minute);
-  _bigSecond.setValue(second10);
-  _smallSecond.setValue(second);
-  
-  _smallMinute.updateDigit(currentAddress);
-  _bigSecond.updateDigit(currentAddress);
-  _smallSecond.updateDigit(currentAddress);
-  if (/*currentAddress == 0 && */_bigMinute > 0) {
-    digitalWrite(PIN_BIG_MINUTE, HIGH);
-  } else {
-    digitalWrite(PIN_BIG_MINUTE, LOW);
-  }
-  //Show the dots at the same time as the period - It uses less power...
-  if (currentAddress == PERIOD) {
-    digitalWrite(PIN_DOTS, HIGH);
-  } else {
-    //digitalWrite(PIN_DOTS, LOW);
-  }
-
-  if (_buzzerOn) {
-    if (millis() > _buzzerOffTime) {
-      _buzzerOn = false;
-      digitalWrite(PIN_BUZZER, LOW);
-    }
-  }
-}
-
 void DownTimer::setFastTime() {
   _fastTime = true;
-  buzzerShort();
 }
 
 void DownTimer::startStop() {
@@ -120,7 +54,7 @@ bool DownTimer::isAfterPeriod() {
 }
 
 bool DownTimer::onPeriodComplete() {
-  buzzerLong();
+  //buzzerLong();
   if (isRunning() && isAfterPeriod()) {
     stop();
     return true;
@@ -155,22 +89,4 @@ void DownTimer::decGameTime() {
 
 void DownTimer::resetShotClock() {
   _shotClockStartElapsed = elapsed();
-}
-
-void DownTimer::buzzerShort() {
-  _buzzerOn = true;
-  _buzzerOffTime = millis() + 250;
-  digitalWrite(PIN_BUZZER, HIGH);
-}
-
-void DownTimer::buzzerShortShort() {
-  _buzzerOn = true;
-  _buzzerOffTime = millis() + 250;
-  digitalWrite(PIN_BUZZER, HIGH);
-}
-
-void DownTimer::buzzerLong() {
-  _buzzerOn = true;
-  _buzzerOffTime = millis() + 1000;
-  digitalWrite(PIN_BUZZER, HIGH);
 }
