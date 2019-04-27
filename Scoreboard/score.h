@@ -8,7 +8,7 @@
 class Score {
   public:
     void attach(uint8_t bigAddress, uint8_t smallAddress, bool useSmallDigitForSmallScore);
-    void updateDigits(uint8_t pwmSize, uint8_t currentAddress);
+    void updateDigits(uint8_t currentAddress);
   
     void inc();
     void dec();

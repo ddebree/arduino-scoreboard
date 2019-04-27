@@ -10,13 +10,11 @@
 #include "downtimer.h"
 #include "sevenseg.h"
 #include "score.h"
-#include "buzzer.h"
 
 DownTimer countDownTimer;
 Score scoreLeft;
 Score scoreRight;
 SevenSeg periodSevenSeg;
-Buzzer buzzer = Buzzer();
 
 Bounce scoreLeftUpBounce = Bounce();
 Bounce scoreLeftDownBounce = Bounce();
@@ -27,7 +25,6 @@ Bounce resetBounce = Bounce();
 Bounce shotTimeBounce = Bounce(); 
 
 uint8_t currentDigit = 0;
-uint8_t pwmWidth = 1;
 
 struct RadioPacket {
     boolean clockRunning;
@@ -41,15 +38,19 @@ unsigned long nextRadioSendTime = 0;
 
 void setup() {
   setupKeys();
-  setupDigits();
-  buzzer.attach();
+
+  //Setup the digits:
+  scoreLeft.attach(SCORE_LEFT_BIG, SCORE_LEFT_SMALL, false);
+  scoreRight.attach(SCORE_RIGHT_BIG, SCORE_RIGHT_SMALL, true);
+  periodSevenSeg.attach(PERIOD);
+  countDownTimer.attach();
+
   periodSevenSeg.setValue(1);
 
   //Make the timer run fast for testing...
   delay(KEY_DEBOUNCE_INTERVAL + 1);
   if ( ! resetBounce.read()) {
     countDownTimer.setFastTime();
-    buzzer.buzzerOn(false, 100);
   }
   Serial.begin(9600);
   if ( ! radio.init(RADIO_ID, PIN_RADIO_CE, PIN_RADIO_CSN)) {
@@ -61,16 +62,17 @@ void setup() {
 void loop() {
   //Serial.println("Loop Start");
   updateKeys();
-  updateDigits();
-  buzzer.update();
-  if (countDownTimer.onPeriodComplete()) {
-    buzzer.buzzerOn(true, 250);
-  }
+  
+  currentDigit = (currentDigit + 1) % 8;
+  scoreLeft.updateDigits(currentDigit);
+  scoreRight.updateDigits(currentDigit);
+  countDownTimer.updateDigits(currentDigit);
+  periodSevenSeg.updateDigit(currentDigit);
 
   //We only send the radio data occasionally:
   if (millis() > nextRadioSendTime) {
     Serial.println("Sending radio data");
-    unsigned long elapsedShotTime = countDownTimer.shotClockElapsed();
+    unsigned long elapsedShotTime = countDownTimer.getShotTimeToShow();
     if (elapsedShotTime < 60000) {
       radioData.clockRunning = countDownTimer.isRunning();
       radioData.clockVisible = true;
@@ -132,7 +134,7 @@ void updateKeys() {
     scoreRight.dec();
   }
   if (shotTimeBounce.rose()) {
-    
+    //TODO: 
   }
 }
 
@@ -142,25 +144,6 @@ void alternatePeriod() {
   } else {
     periodSevenSeg.setValue(1);
   }
-}
-
-void updateDigits() {
-  currentDigit++;
-  if (currentDigit >= 8) {
-    currentDigit = 0;
-  }
-
-  scoreLeft.updateDigits(pwmWidth, currentDigit);
-  scoreRight.updateDigits(pwmWidth, currentDigit);
-  countDownTimer.updateDigits(pwmWidth, currentDigit);
-  periodSevenSeg.updateDigit(pwmWidth, currentDigit);
-}
-
-void setupDigits() {
-  scoreLeft.attach(SCORE_LEFT_BIG, SCORE_LEFT_SMALL, false);
-  scoreRight.attach(SCORE_RIGHT_BIG, SCORE_RIGHT_SMALL, true);
-  periodSevenSeg.attach(PERIOD);
-  countDownTimer.attach();
 }
 
 void setupKeys() {

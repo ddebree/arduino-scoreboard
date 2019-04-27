@@ -9,7 +9,7 @@ void Score::attach(uint8_t bigAddress, uint8_t smallAddress, bool useSmallDigitF
   _useSmallDigitForSmallScore = useSmallDigitForSmallScore;
 }
 
-void Score::updateDigits(uint8_t pwmSize, uint8_t currentAddress) {
+void Score::updateDigits(uint8_t currentAddress) {
   if (_score >= 10) {
     //Find the small and big score values:
     uint8_t smallScore = _score;
@@ -30,8 +30,8 @@ void Score::updateDigits(uint8_t pwmSize, uint8_t currentAddress) {
     }
   }
 
-  _bigSevenSeg.updateDigit(pwmSize, currentAddress);
-  _smallSevenSeg.updateDigit(pwmSize, currentAddress);
+  _bigSevenSeg.updateDigit(currentAddress);
+  _smallSevenSeg.updateDigit(currentAddress);
 }
 
 void Score::inc() {
@@ -49,4 +49,3 @@ void Score::dec() {
 void Score::reset() {
   _score = 0;
 }
-

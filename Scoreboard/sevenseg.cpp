@@ -10,7 +10,7 @@ void SevenSeg::attach(uint8_t address) {
   }
 }
 
-void SevenSeg::updateDigit(uint8_t pwmSize, uint8_t currentAddress) {
+void SevenSeg::updateDigit(uint8_t currentAddress) {
   if (_visible) {
     //Figure out when to turn off:
     if (currentAddress != _address) {

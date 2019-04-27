@@ -9,7 +9,7 @@
 class DownTimer : public Chrono {
   public:
     void attach();
-    void updateDigits(uint8_t pwmSize, uint8_t currentAddress);
+    void updateDigits(uint8_t currentAddress);
     void setFastTime();
 
     unsigned long elapsed() const;
@@ -20,16 +20,24 @@ class DownTimer : public Chrono {
 
     bool isAfterPeriod();
 
-    unsigned long shotClockElapsed();
+    unsigned long getGameTimeToShow();
+    unsigned long getShotTimeToShow();
 
     void incGameTime();
     void decGameTime();
     void resetShotClock();
 
+    void buzzerShort();
+    void buzzerShortShort();
+    void buzzerLong();
+
   protected:
     byte _gameLengthDivide5s;
     unsigned long _gameLength;
     bool _fastTime = false;
+
+    bool _buzzerOn;
+    unsigned long _buzzerOffTime;
 
     unsigned long _shotClockStartElapsed;
 

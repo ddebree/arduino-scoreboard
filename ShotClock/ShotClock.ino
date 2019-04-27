@@ -5,6 +5,9 @@ const static uint8_t RADIO_ID = 23;       // Our radio's id.  The transmitter wi
 const static uint8_t PIN_RADIO_CE = A0;
 const static uint8_t PIN_RADIO_CSN = A1;
 
+//If we havent updated the display in X millis, turn the display off
+const static unsigned long SLEEP_TIME = 90000;
+
 struct RadioPacket {
     boolean clockRunning;
     boolean clockVisible;
@@ -13,7 +16,12 @@ struct RadioPacket {
 
 NRFLite radio;
 RadioPacket radioData;
+
+//The last time the loop function was started:
 unsigned long lastLoopStartTime = 0;
+
+//The last time the time was changed on the display:
+unsigned long lastChangeTime = 0;
 
 void setup() {
   radioData.clockRunning = true;
@@ -44,6 +52,7 @@ void loop() {
   //Receive the current time over the radio:
   if (radio.hasData()){
     radio.readData(&radioData); 
+    lastChangeTime = millis();
     
     Serial.print("Received: ");
     Serial.print(radioData.currentTime);
@@ -53,6 +62,7 @@ void loop() {
     Serial.print(radioData.clockVisible);
     Serial.println();
   } else if (radioData.clockRunning) {
+    lastChangeTime = millis();
     unsigned long loopTime = loopStartTime - lastLoopStartTime;
     if (radioData.currentTime < loopTime) {
       radioData.currentTime = 0;
@@ -93,5 +103,10 @@ void loop() {
 
     digitalWrite(9, HIGH);
     digitalWrite(10, HIGH);
+  }
+
+  unsigned long timeSinceLastChange = millis() - lastChangeTime;
+  if ( timeSinceLastChange > SLEEP_TIME) {
+    radioData.clockVisible = false;
   }
 }

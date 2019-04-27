@@ -13,9 +13,11 @@ void DownTimer::attach() {
 
   pinMode(PIN_DOTS, OUTPUT);
   pinMode(PIN_BIG_MINUTE, OUTPUT);
+  pinMode(PIN_BUZZER, OUTPUT);
 
   digitalWrite(PIN_DOTS, LOW);
   digitalWrite(PIN_BIG_MINUTE, LOW);
+  digitalWrite(PIN_BUZZER, LOW);
 
   _gameLengthDivide5s = EEPROM.read(GAME_LENGTH_ADDRESS);
   //test: _gameLengthDivide5s = 4;
@@ -32,19 +34,23 @@ unsigned long DownTimer::elapsed() const {
   }
 }
 
-unsigned long DownTimer::shotClockElapsed() {
-  return elapsed() - _shotClockStartElapsed;
-}
-
-void DownTimer::updateDigits(uint8_t pwmSize, uint8_t currentAddress) {
+unsigned long DownTimer::getGameTimeToShow() {
   unsigned long gameTime = elapsed();
-
   unsigned long timeToShow = 0;
   if (gameTime < _gameLength) {
     timeToShow = _gameLength - gameTime;
     //This makes it show a little more time to make it finsh exactly on zero
     timeToShow += 999L;
   }
+  return timeToShow;
+}
+
+unsigned long DownTimer::getShotTimeToShow() {
+  return elapsed() - _shotClockStartElapsed;
+}
+
+void DownTimer::updateDigits(uint8_t currentAddress) {
+  unsigned long timeToShow = getGameTimeToShow();
   
   uint8_t minute10 = 0;
   uint8_t minute = 0;
@@ -73,9 +79,9 @@ void DownTimer::updateDigits(uint8_t pwmSize, uint8_t currentAddress) {
   _bigSecond.setValue(second10);
   _smallSecond.setValue(second);
   
-  _smallMinute.updateDigit(pwmSize, currentAddress);
-  _bigSecond.updateDigit(pwmSize, currentAddress);
-  _smallSecond.updateDigit(pwmSize, currentAddress);
+  _smallMinute.updateDigit(currentAddress);
+  _bigSecond.updateDigit(currentAddress);
+  _smallSecond.updateDigit(currentAddress);
   if (/*currentAddress == 0 && */_bigMinute > 0) {
     digitalWrite(PIN_BIG_MINUTE, HIGH);
   } else {
@@ -86,11 +92,19 @@ void DownTimer::updateDigits(uint8_t pwmSize, uint8_t currentAddress) {
     digitalWrite(PIN_DOTS, HIGH);
   } else {
     //digitalWrite(PIN_DOTS, LOW);
-  }  
+  }
+
+  if (_buzzerOn) {
+    if (millis() > _buzzerOffTime) {
+      _buzzerOn = false;
+      digitalWrite(PIN_BUZZER, LOW);
+    }
+  }
 }
 
 void DownTimer::setFastTime() {
   _fastTime = true;
+  buzzerShort();
 }
 
 void DownTimer::startStop() {
@@ -106,6 +120,7 @@ bool DownTimer::isAfterPeriod() {
 }
 
 bool DownTimer::onPeriodComplete() {
+  buzzerLong();
   if (isRunning() && isAfterPeriod()) {
     stop();
     return true;
@@ -140,4 +155,22 @@ void DownTimer::decGameTime() {
 
 void DownTimer::resetShotClock() {
   _shotClockStartElapsed = elapsed();
+}
+
+void DownTimer::buzzerShort() {
+  _buzzerOn = true;
+  _buzzerOffTime = millis() + 250;
+  digitalWrite(PIN_BUZZER, HIGH);
+}
+
+void DownTimer::buzzerShortShort() {
+  _buzzerOn = true;
+  _buzzerOffTime = millis() + 250;
+  digitalWrite(PIN_BUZZER, HIGH);
+}
+
+void DownTimer::buzzerLong() {
+  _buzzerOn = true;
+  _buzzerOffTime = millis() + 1000;
+  digitalWrite(PIN_BUZZER, HIGH);
 }
