@@ -22,10 +22,6 @@ void Buzzer::update() {
 void Buzzer::buzzerOn(bool highPitch, unsigned long onTime) {
   _buzzerOn = true;
   _offTime = millis() + onTime;
-  if (highPitch) {
-    digitalWrite(PIN_BUZZER_HIGH, HIGH);
-  } else {
-    digitalWrite(PIN_BUZZER_LOW, HIGH);
-  }
+  digitalWrite(PIN_BUZZER_HIGH, HIGH);
+  digitalWrite(PIN_BUZZER_LOW, HIGH);
 }
-

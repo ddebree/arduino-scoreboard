@@ -38,6 +38,7 @@
 #define BUTTON_PIN_RIGHT_DOWN A4
 #define BUTTON_PIN_START A3
 #define BUTTON_PIN_RESET A2
+#define BUTTON_PIN_SHOT_CLOCK 13
 
 #define PIN_DOTS 10
 #define PIN_BIG_MINUTE 9
@@ -45,4 +46,9 @@
 #define PIN_BUZZER_HIGH 11
 #define PIN_BUZZER_LOW 8
 
-
+// The radio details:
+// Our radio's id.  The transmitter will send to this id:
+#define RADIO_ID 0
+#define RADIO_SEND_INTERVAL 1000
+#define PIN_RADIO_CE 12
+#define PIN_RADIO_CSN 11

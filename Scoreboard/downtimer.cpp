@@ -32,6 +32,10 @@ unsigned long DownTimer::elapsed() const {
   }
 }
 
+unsigned long DownTimer::shotClockElapsed() {
+  return elapsed() - _shotClockStartElapsed;
+}
+
 void DownTimer::updateDigits(uint8_t pwmSize, uint8_t currentAddress) {
   unsigned long gameTime = elapsed();
 
@@ -132,4 +136,8 @@ void DownTimer::decGameTime() {
       EEPROM.write(GAME_LENGTH_ADDRESS, _gameLengthDivide5s);
     }
   }
+}
+
+void DownTimer::resetShotClock() {
+  _shotClockStartElapsed = elapsed();
 }

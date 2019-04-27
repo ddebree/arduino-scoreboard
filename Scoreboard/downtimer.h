@@ -20,13 +20,18 @@ class DownTimer : public Chrono {
 
     bool isAfterPeriod();
 
+    unsigned long shotClockElapsed();
+
     void incGameTime();
     void decGameTime();
+    void resetShotClock();
 
   protected:
     byte _gameLengthDivide5s;
     unsigned long _gameLength;
     bool _fastTime = false;
+
+    unsigned long _shotClockStartElapsed;
 
     uint8_t _bigMinute;
     SevenSeg _smallMinute;

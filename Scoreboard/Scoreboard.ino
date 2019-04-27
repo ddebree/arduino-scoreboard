@@ -3,6 +3,7 @@
 #include <Adafruit_MCP23008.h>
 #include <Chrono.h>
 #include <EEPROM.h>
+#include <NRFLite.h>
 
 #include "defines.h"
 
@@ -23,9 +24,20 @@ Bounce scoreRightUpBounce = Bounce();
 Bounce scoreRightDownBounce = Bounce();
 Bounce timeStartBounce = Bounce(); 
 Bounce resetBounce = Bounce(); 
+Bounce shotTimeBounce = Bounce(); 
 
 uint8_t currentDigit = 0;
 uint8_t pwmWidth = 1;
+
+struct RadioPacket {
+    boolean clockRunning;
+    boolean clockVisible;
+    unsigned long currentTime;
+};
+
+NRFLite radio;
+RadioPacket radioData;
+unsigned long nextRadioSendTime = 0;
 
 void setup() {
   setupKeys();
@@ -39,14 +51,38 @@ void setup() {
     countDownTimer.setFastTime();
     buzzer.buzzerOn(false, 100);
   }
+  Serial.begin(9600);
+  if ( ! radio.init(RADIO_ID, PIN_RADIO_CE, PIN_RADIO_CSN)) {
+    Serial.println("Cannot communicate with radio");
+    while (1); // Wait here forever.
+  }
 }
 
 void loop() {
+  //Serial.println("Loop Start");
   updateKeys();
   updateDigits();
   buzzer.update();
   if (countDownTimer.onPeriodComplete()) {
     buzzer.buzzerOn(true, 250);
+  }
+
+  //We only send the radio data occasionally:
+  if (millis() > nextRadioSendTime) {
+    Serial.println("Sending radio data");
+    unsigned long elapsedShotTime = countDownTimer.shotClockElapsed();
+    if (elapsedShotTime < 60000) {
+      radioData.clockRunning = countDownTimer.isRunning();
+      radioData.clockVisible = true;
+      radioData.currentTime = 60000 - elapsedShotTime;
+    } else {
+      radioData.clockRunning = false;
+      radioData.clockVisible = true;
+      radioData.currentTime = 0;
+    }
+    
+    radio.send(RADIO_ID, &radioData, sizeof(radioData));
+    nextRadioSendTime = millis() + RADIO_SEND_INTERVAL;
   }
 }
 
@@ -58,6 +94,7 @@ void updateKeys() {
   scoreRightDownBounce.update();
   timeStartBounce.update();
   resetBounce.update();
+  shotTimeBounce.update();
 
   if (timeStartBounce.rose()) {
     if ( ! resetBounce.read()) {
@@ -67,6 +104,7 @@ void updateKeys() {
       alternatePeriod();
     } else {
       countDownTimer.startStop();
+      nextRadioSendTime = millis();
     }
   }
   if (resetBounce.rose() && ! countDownTimer.isRunning()) {
@@ -92,6 +130,9 @@ void updateKeys() {
   }
   if (scoreRightDownBounce.rose()) {
     scoreRight.dec();
+  }
+  if (shotTimeBounce.rose()) {
+    
   }
 }
 
@@ -129,6 +170,7 @@ void setupKeys() {
   pinMode(BUTTON_PIN_RIGHT_DOWN, INPUT_PULLUP);
   pinMode(BUTTON_PIN_START, INPUT_PULLUP);
   pinMode(BUTTON_PIN_RESET, INPUT_PULLUP);
+  pinMode(BUTTON_PIN_SHOT_CLOCK, INPUT_PULLUP);
 
   scoreLeftUpBounce.attach(BUTTON_PIN_LEFT_UP);
   scoreLeftDownBounce.attach(BUTTON_PIN_LEFT_DOWN);
@@ -136,11 +178,13 @@ void setupKeys() {
   scoreRightDownBounce.attach(BUTTON_PIN_RIGHT_DOWN);
   timeStartBounce.attach(BUTTON_PIN_START);
   resetBounce.attach(BUTTON_PIN_RESET);
+  shotTimeBounce.attach(BUTTON_PIN_SHOT_CLOCK);
 
   scoreLeftUpBounce.interval(KEY_DEBOUNCE_INTERVAL); // interval in ms
   scoreLeftDownBounce.interval(KEY_DEBOUNCE_INTERVAL); // interval in ms 
   scoreRightUpBounce.interval(KEY_DEBOUNCE_INTERVAL); // interval in ms
   scoreRightDownBounce.interval(KEY_DEBOUNCE_INTERVAL); // interval in ms 
   timeStartBounce.interval(KEY_DEBOUNCE_INTERVAL); // interval in ms
-  resetBounce.interval(KEY_DEBOUNCE_INTERVAL); // interval in ms 
+  resetBounce.interval(KEY_DEBOUNCE_INTERVAL); // interval in ms
+  shotTimeBounce.interval(KEY_DEBOUNCE_INTERVAL); // interval in ms
 }
