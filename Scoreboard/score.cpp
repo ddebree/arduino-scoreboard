@@ -9,6 +9,18 @@ void Score::attach(uint8_t bigAddress, uint8_t smallAddress, bool useSmallDigitF
   _useSmallDigitForSmallScore = useSmallDigitForSmallScore;
 }
 
+uint8_t Score::getSmallScore() {
+  return _score % 10;
+}
+
+uint8_t Score::getBigScore() {
+  if (_score > 10) {
+    return _score / 10;
+  } else {
+    return 0;
+  }
+}
+
 void Score::updateDigits(uint8_t currentAddress) {
   if (_score >= 10) {
     //Find the small and big score values:

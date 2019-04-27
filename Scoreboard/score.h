@@ -9,7 +9,10 @@ class Score {
   public:
     void attach(uint8_t bigAddress, uint8_t smallAddress, bool useSmallDigitForSmallScore);
     void updateDigits(uint8_t currentAddress);
-  
+
+    uint8_t getSmallScore();
+    uint8_t getBigScore();
+
     void inc();
     void dec();
     void reset();
