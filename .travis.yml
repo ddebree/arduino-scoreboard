@@ -10,5 +10,7 @@ before_install:
   - export PATH=$PATH:$HOME/bin
   - arduino-cli core update-index
   - arduino-cli core install arduino:avr
+install:
+  - arduino-cli lib install "NRFLite"
 script:
   - arduino-cli compile --verbose --warnings all --fqbn arduino:avr:nano ShotClock
