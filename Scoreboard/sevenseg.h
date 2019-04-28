@@ -8,17 +8,13 @@ class SevenSeg {
   public:
     void attach(uint8_t address);
     void setValue(uint8_t value);
-    void updateDigit(uint8_t currentAddress);
     uint8_t getValue();
 
-  protected:
+  private:
     uint8_t decodeDigit(uint8_t input);
-    void showDigit();
-    void hideDigit();
-    
+
     uint8_t _address;
     uint8_t _value;
-    boolean _visible;
     Adafruit_MCP23008 _digit;
 };
 

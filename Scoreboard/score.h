@@ -7,7 +7,7 @@
 
 class Score {
   public:
-    void attach(bool useSmallDigitForSmallScore);
+    void init(bool useSmallDigitForSmallScore);
 
     uint8_t getLeftDigit();
     uint8_t getRightDigit();

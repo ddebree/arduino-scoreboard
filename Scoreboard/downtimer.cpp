@@ -6,7 +6,7 @@
 
 #include "defines.h"
 
-void DownTimer::attach() {
+void DownTimer::init() {
   _gameLengthDivide5s = EEPROM.read(GAME_LENGTH_ADDRESS);
   //test: _gameLengthDivide5s = 4;
   _gameLength = _gameLengthDivide5s;
@@ -34,6 +34,8 @@ unsigned long DownTimer::getGameTimeToShow() {
 }
 
 unsigned long DownTimer::getShotTimeToShow() {
+  //60000L - elapsedShotTime
+
   return elapsed() - _shotClockStartElapsed;
 }
 

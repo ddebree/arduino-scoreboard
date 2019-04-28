@@ -3,7 +3,7 @@
 #define MAX_SCORE 50
 #include "defines.h"
 
-void Score::attach(bool useSmallDigitForSmallScore) {
+void Score::init(bool useSmallDigitForSmallScore) {
   _useSmallDigitForSmallScore = useSmallDigitForSmallScore;
 }
 

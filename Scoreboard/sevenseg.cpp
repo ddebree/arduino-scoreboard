@@ -8,38 +8,19 @@ void SevenSeg::attach(uint8_t address) {
   for (uint8_t i = 0; i < 8; i++) {
     _digit.pinMode(i, OUTPUT);
   }
-}
-
-void SevenSeg::updateDigit(uint8_t currentAddress) {
-  if (_visible) {
-    //Figure out when to turn off:
-    if (currentAddress != _address) {
-      //hideDigit();
-    }
-  } else if (currentAddress == _address) {
-    showDigit();
-  }
+  _value = BLANK_DIGIT;
+  _digit.writeGPIO(decodeDigit(BLANK_DIGIT));
 }
 
 void SevenSeg::setValue(uint8_t value) {
-  _value = value;
-  if (_visible) {
-    showDigit();
+  if (value != _value) {
+    _value = value;
+    _digit.writeGPIO(decodeDigit(_value));
   }
 }
 
 uint8_t SevenSeg::getValue() {
   return _value;
-}
-
-void SevenSeg::showDigit() {
-  _visible = true;
-  _digit.writeGPIO(decodeDigit(_value));
-}
-
-void SevenSeg::hideDigit() {
-  _visible = false;
-  _digit.writeGPIO(0);
 }
 
 uint8_t SevenSeg::decodeDigit(uint8_t input) {

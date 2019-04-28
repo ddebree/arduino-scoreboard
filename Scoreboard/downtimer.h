@@ -8,7 +8,7 @@
 
 class DownTimer : public Chrono {
   public:
-    void attach();
+    void init();
     void setFastTime();
 
     unsigned long elapsed() const;
