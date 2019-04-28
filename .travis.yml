@@ -16,4 +16,4 @@ install:
   - arduino-cli lib install "Adafruit MCP23008 library"
 script:
   - arduino-cli compile --fqbn arduino:avr:nano ShotClock
-  - arduino-cli compile --fqbn arduino:avr:nano Scoreboard
+  - arduino-cli compile --fqbn arduino:avr:leonardo Scoreboard
