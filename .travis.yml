@@ -11,4 +11,4 @@ before_install:
   - arduino-cli core update-index
   - arduino-cli core install arduino:avr
 script:
-  - arduino-cli compile --fqbn arduino:avr:nanon ShotClock
+  - arduino-cli compile --verbose --warnings all --fqbn arduino:avr:nano ShotClock
