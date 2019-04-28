@@ -7,11 +7,10 @@
 
 class Score {
   public:
-    void attach(uint8_t bigAddress, uint8_t smallAddress, bool useSmallDigitForSmallScore);
-    void updateDigits(uint8_t currentAddress);
+    void attach(bool useSmallDigitForSmallScore);
 
-    uint8_t getSmallScore();
-    uint8_t getBigScore();
+    uint8_t getLeftDigit();
+    uint8_t getRightDigit();
 
     void inc();
     void dec();
@@ -20,8 +19,11 @@ class Score {
   protected:
     uint8_t _score;
     bool _useSmallDigitForSmallScore;
-    SevenSeg _bigSevenSeg;
-    SevenSeg _smallSevenSeg;
+
+    uint8_t _rightDigit;
+    uint8_t _leftDigit;
+  private:
+    void updateDigits();
 };
 
 #endif

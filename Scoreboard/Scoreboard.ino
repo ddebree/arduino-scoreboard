@@ -15,6 +15,11 @@ DownTimer countDownTimer;
 Score scoreLeft;
 Score scoreRight;
 
+SevenSeg scoreLeftLeft;
+SevenSeg scoreLeftRight;
+SevenSeg scoreRightLeft;
+SevenSeg scoreRightRight;
+
 SevenSeg smallMinute;
 SevenSeg bigSecond;
 SevenSeg smallSecond;
@@ -48,8 +53,14 @@ void setup() {
   setupKeys();
 
   //Setup the digits:
-  scoreLeft.attach(SCORE_LEFT_BIG, SCORE_LEFT_SMALL, false);
-  scoreRight.attach(SCORE_RIGHT_BIG, SCORE_RIGHT_SMALL, true);
+  scoreLeft.attach(false);
+  scoreRight.attach(true);
+
+  scoreLeftLeft.attach(SCORE_LEFT_BIG);
+  scoreLeftRight.attach(SCORE_LEFT_SMALL);
+  scoreRightLeft.attach(SCORE_RIGHT_BIG);
+  scoreRightRight.attach(SCORE_RIGHT_SMALL);
+
   periodSevenSeg.attach(PERIOD);
   smallMinute.attach(TIME_MINUTE_SMALL);
   bigSecond.attach(TIME_SECOND_BIG);
@@ -93,8 +104,15 @@ void loop() {
   }
 
   currentDigit = (currentDigit + 1) % 8;
-  scoreLeft.updateDigits(currentDigit);
-  scoreRight.updateDigits(currentDigit);
+  scoreLeftLeft.setValue(scoreLeft.getLeftDigit());
+  scoreLeftRight.setValue(scoreLeft.getRightDigit());
+  scoreRightLeft.setValue(scoreRight.getLeftDigit());
+  scoreRightRight.setValue(scoreRight.getRightDigit());
+
+  scoreLeftLeft.updateDigit(currentDigit);
+  scoreLeftRight.updateDigit(currentDigit);
+  scoreRightLeft.updateDigit(currentDigit);
+  scoreRightRight.updateDigit(currentDigit);
 
   smallMinute.updateDigit(currentDigit);
   bigSecond.updateDigit(currentDigit);

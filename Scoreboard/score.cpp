@@ -3,25 +3,38 @@
 #define MAX_SCORE 50
 #include "defines.h"
 
-void Score::attach(uint8_t bigAddress, uint8_t smallAddress, bool useSmallDigitForSmallScore) {
-  _bigSevenSeg.attach(bigAddress);
-  _smallSevenSeg.attach(smallAddress);
+void Score::attach(bool useSmallDigitForSmallScore) {
   _useSmallDigitForSmallScore = useSmallDigitForSmallScore;
 }
 
-uint8_t Score::getSmallScore() {
-  return _score % 10;
+uint8_t Score::getLeftDigit() {
+  return _leftDigit;
 }
 
-uint8_t Score::getBigScore() {
-  if (_score > 10) {
-    return _score / 10;
-  } else {
-    return 0;
+uint8_t Score::getRightDigit() {
+  return _rightDigit;
+}
+
+void Score::inc() {
+  if (_score < MAX_SCORE) {
+    _score++;
+    updateDigits();
   }
 }
 
-void Score::updateDigits(uint8_t currentAddress) {
+void Score::dec() {
+  if (_score > 0) {
+    _score--;
+    updateDigits();
+  }
+}
+
+void Score::reset() {
+  _score = 0;
+  updateDigits();
+}
+
+void Score::updateDigits() {
   if (_score >= 10) {
     //Find the small and big score values:
     uint8_t smallScore = _score;
@@ -30,34 +43,15 @@ void Score::updateDigits(uint8_t currentAddress) {
       smallScore = smallScore - 10;
       bigScore++;
     }
-    _bigSevenSeg.setValue(bigScore);
-    _smallSevenSeg.setValue(smallScore);
+    _leftDigit = bigScore;
+    _rightDigit = smallScore;
   } else {
     if (_useSmallDigitForSmallScore) {
-      _bigSevenSeg.setValue(BLANK_DIGIT);
-      _smallSevenSeg.setValue(_score);
+      _leftDigit = BLANK_DIGIT;
+      _rightDigit = _score;
     } else {
-      _bigSevenSeg.setValue(_score);
-      _smallSevenSeg.setValue(BLANK_DIGIT);
+      _leftDigit = _score;
+      _rightDigit = BLANK_DIGIT;
     }
   }
-
-  _bigSevenSeg.updateDigit(currentAddress);
-  _smallSevenSeg.updateDigit(currentAddress);
-}
-
-void Score::inc() {
-  if (_score < MAX_SCORE) {
-    _score++;
-  }
-}
-
-void Score::dec() {
-  if (_score > 0) {
-    _score--;
-  }
-}
-
-void Score::reset() {
-  _score = 0;
 }
