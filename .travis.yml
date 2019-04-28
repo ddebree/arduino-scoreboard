@@ -2,7 +2,7 @@ language: generic
 env:
   global:
     - CLI_VERSION=latest
-before_install:
+install:
   - wget http://downloads.arduino.cc/arduino-cli/arduino-cli-$CLI_VERSION-linux64.tar.bz2
   - tar xf arduino-cli-$CLI_VERSION-linux64.tar.bz2
   - mkdir -p $HOME/bin
@@ -10,7 +10,6 @@ before_install:
   - export PATH=$PATH:$HOME/bin
   - arduino-cli core update-index
   - arduino-cli core install arduino:avr
-install:
   - arduino-cli lib install "NRFLite"
   - arduino-cli lib install "Bounce2"
   - arduino-cli lib install "Chrono"
