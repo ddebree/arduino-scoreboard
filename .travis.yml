@@ -9,7 +9,8 @@ before_install:
   - sudo ln -s /usr/local/share/arduino/arduino /usr/local/bin/arduino
 install:
   - ln -s $PWD /usr/local/share/arduino/libraries/Adafruit_FONA
-  - arduino --install-library "Bounce2,Adafruit MCP23008 library,Chrono,NRFLite"
+  - arduino --install-library "Bounce2"
+  - arduino --install-library "Adafruit MCP23008 library,Chrono,NRFLite"
 script:
   - arduino --verify --board arduino:avr:leonardo $PWD/ScoreBoard/ScoreBoard.ino
   - arduino --verify --board arduino:avr:nano $PWD/ShotClock/ShotClock.ino
