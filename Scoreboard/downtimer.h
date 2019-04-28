@@ -15,9 +15,13 @@ class DownTimer : public Chrono {
 
     void startStop();
     void reset();
-    bool onPeriodComplete();
+
+    bool hasJustCompleted();
+    bool hasShotClockJustCompleted();
 
     bool isAfterPeriod();
+
+    unsigned long shotClockElapsed();
 
     unsigned long getGameTimeToShow();
     unsigned long getShotTimeToShow();
@@ -32,6 +36,7 @@ class DownTimer : public Chrono {
     bool _fastTime = false;
 
     unsigned long _shotClockStartElapsed;
+    bool _shotClockExpired;
 
     uint8_t _bigMinute;
 };

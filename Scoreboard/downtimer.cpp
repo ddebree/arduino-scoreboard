@@ -3,6 +3,7 @@
 #include <EEPROM.h>
 
 #define GAME_LENGTH_ADDRESS 0
+#define SHOT_CLOCK_TIME 60000L
 
 #include "defines.h"
 
@@ -22,21 +23,28 @@ unsigned long DownTimer::elapsed() const {
   }
 }
 
+unsigned long DownTimer::shotClockElapsed() {
+  return elapsed() - _shotClockStartElapsed;
+}
+
 unsigned long DownTimer::getGameTimeToShow() {
   unsigned long gameTime = elapsed();
-  unsigned long timeToShow = 0;
   if (gameTime < _gameLength) {
-    timeToShow = _gameLength - gameTime;
     //This makes it show a little more time to make it finsh exactly on zero
-    timeToShow += 999L;
+    return _gameLength + 999L - gameTime;
+  } else {
+    return 0;
   }
-  return timeToShow;
 }
 
 unsigned long DownTimer::getShotTimeToShow() {
-  //60000L - elapsedShotTime
-
-  return elapsed() - _shotClockStartElapsed;
+  unsigned long shotClockTime = shotClockElapsed();
+  if (shotClockTime < SHOT_CLOCK_TIME) {
+    //We add 999 to
+    return (SHOT_CLOCK_TIME + 999L) - shotClockTime;
+  } else {
+    return 0;
+  }
 }
 
 void DownTimer::setFastTime() {
@@ -55,7 +63,7 @@ bool DownTimer::isAfterPeriod() {
   return hasPassed(_gameLength);
 }
 
-bool DownTimer::onPeriodComplete() {
+bool DownTimer::hasJustCompleted() {
   //buzzerLong();
   if (isRunning() && isAfterPeriod()) {
     stop();
@@ -64,9 +72,20 @@ bool DownTimer::onPeriodComplete() {
   return false;
 }
 
+bool DownTimer::hasShotClockJustCompleted() {
+  if (isRunning()
+    && ( ! _shotClockExpired)
+    && shotClockElapsed() > SHOT_CLOCK_TIME) {
+    _shotClockExpired = true;
+    return true;
+  } else {
+    return false;
+  }
+}
+
 void DownTimer::reset() {
   _startTime = _offset = 0;
-  _isRunning = false;
+  _isRunning = _shotClockExpired = false;
 }
 
 void DownTimer::incGameTime() {
@@ -91,4 +110,5 @@ void DownTimer::decGameTime() {
 
 void DownTimer::resetShotClock() {
   _shotClockStartElapsed = elapsed();
+  _shotClockExpired = false;
 }

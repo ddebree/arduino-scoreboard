@@ -79,6 +79,13 @@ void loop() {
   updateScoreDisplay();
   updateBuzzer();
   updateRadio();
+
+  if (countDownTimer.hasJustCompleted()) {
+    buzzer.buzzerLong();
+  }
+  if (countDownTimer.hasShotClockJustCompleted()) {
+    buzzer.buzzerShortShort();
+  }
 }
 
 void updateKeys() {
