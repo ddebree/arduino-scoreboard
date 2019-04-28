@@ -12,5 +12,9 @@ before_install:
   - arduino-cli core install arduino:avr
 install:
   - arduino-cli lib install "NRFLite"
+  - arduino-cli lib install "Bounce2"
+  - arduino-cli lib install "Chrono"
+  - arduino-cli lib install "Adafruit MCP23008 library"
 script:
-  - arduino-cli compile --verbose --warnings all --fqbn arduino:avr:nano ShotClock
+  - arduino-cli compile --fqbn arduino:avr:nano ShotClock
+  - arduino-cli compile --fqbn arduino:avr:nano Scoreboard
