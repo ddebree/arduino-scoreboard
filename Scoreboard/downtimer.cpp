@@ -10,8 +10,6 @@
 void DownTimer::init() {
   _gameLengthDivide5s = EEPROM.read(GAME_LENGTH_ADDRESS);
   //test: _gameLengthDivide5s = 4;
-  _gameLength = _gameLengthDivide5s;
-  _gameLength *= 5000L;
   reset();
 }
 
@@ -38,10 +36,16 @@ unsigned long DownTimer::getGameTimeToShow() {
 }
 
 unsigned long DownTimer::getShotTimeToShow() {
+  unsigned long gameTimeToShow = getGameTimeToShow();
   unsigned long shotClockTime = shotClockElapsed();
   if (shotClockTime < SHOT_CLOCK_TIME) {
-    //We add 999 to
-    return (SHOT_CLOCK_TIME + 999L) - shotClockTime;
+    //Add 999 to make the end right:
+    unsigned long shotClockTimeToShow = (SHOT_CLOCK_TIME + 999L) - shotClockTime;
+    if (shotClockTimeToShow > gameTimeToShow) {
+      return gameTimeToShow;
+    } else {
+      return shotClockTimeToShow;
+    }
   } else {
     return 0;
   }
@@ -84,27 +88,42 @@ bool DownTimer::hasShotClockJustCompleted() {
 }
 
 void DownTimer::reset() {
+  //Two steps to avoid possible casting issue:
+  _gameLength = _gameLengthDivide5s;
+  _gameLength *= 5000L;
   _startTime = _offset = 0;
   _isRunning = _shotClockExpired = false;
 }
 
-void DownTimer::incGameTime() {
+void DownTimer::incGameTime(bool persistTimeChange) {
   if (! isRunning()) {
-    if (_gameLengthDivide5s < 240) {
-      _gameLengthDivide5s++;
+    if (persistTimeChange) {
+      if (_gameLengthDivide5s < 240) {
+        _gameLength += 5000L;
+        _gameLengthDivide5s++;
+        EEPROM.write(GAME_LENGTH_ADDRESS, _gameLengthDivide5s);
+      }
+    } else {
       _gameLength += 5000L;
-      EEPROM.write(GAME_LENGTH_ADDRESS, _gameLengthDivide5s);
     }
   }
 }
 
-void DownTimer::decGameTime() {
+void DownTimer::decGameTime(boolean persistTimeChange) {
   if (! isRunning()) {
-    if (_gameLengthDivide5s > 12) {
-      _gameLengthDivide5s--;
-      _gameLength = _gameLength - 5000L;
-      EEPROM.write(GAME_LENGTH_ADDRESS, _gameLengthDivide5s);
+    if (persistTimeChange) {
+      if (_gameLengthDivide5s > 12) {
+        _gameLength = _gameLength - 5000L;
+        _gameLengthDivide5s--;
+        EEPROM.write(GAME_LENGTH_ADDRESS, _gameLengthDivide5s);
+      }
+    } else {
+      if (_gameLength > 5000L) {
+        _gameLength = _gameLength - 5000L;
+      }
     }
+    
+    
   }
 }
 

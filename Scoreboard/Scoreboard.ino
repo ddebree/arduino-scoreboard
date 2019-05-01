@@ -45,6 +45,8 @@ RadioPacket radioData;
 unsigned long nextRadioSendTime = 0;
 bool radioSendNow = false;
 
+bool persistTimeChange = true;
+
 void setup() {
   setupKeys();
   setupDisplays();
@@ -84,7 +86,7 @@ void loop() {
     buzzer.buzzerLong();
   }
   if (countDownTimer.hasShotClockJustCompleted()) {
-    buzzer.buzzerShortShort();
+    buzzer.buzzerShort();
   }
 }
 
@@ -99,6 +101,7 @@ void updateKeys() {
   shotTimeBounce.update();
 
   if (timeStartBounce.rose()) {
+    persistTimeChange = false;
     if ( ! resetBounce.read()) {
       countDownTimer.reset();
     } else if (countDownTimer.isAfterPeriod()) {
@@ -117,14 +120,14 @@ void updateKeys() {
     if (resetBounce.read()) {
       scoreLeft.inc();
     } else {
-      countDownTimer.incGameTime();
+      countDownTimer.incGameTime(persistTimeChange);
     }
   }
   if (scoreLeftDownBounce.rose()) {
     if (resetBounce.read()) {
       scoreLeft.dec();
     } else {
-      countDownTimer.decGameTime();
+      countDownTimer.decGameTime(persistTimeChange);
     }
   }
   if (scoreRightUpBounce.rose()) {
@@ -202,11 +205,11 @@ void updateRadio() {
   if ((millis() > nextRadioSendTime) || radioSendNow) {
     Serial.println("Sending radio data");
     radioSendNow = false;
-    unsigned long elapsedShotTime = countDownTimer.getShotTimeToShow();
-    if (elapsedShotTime < 60000L) {
+    unsigned long shotClockTimeToShow = countDownTimer.getShotTimeToShow();
+    if (shotClockTimeToShow > 0) {
       radioData.clockRunning = countDownTimer.isRunning();
       radioData.clockVisible = true;
-      radioData.currentTime = 60000L - elapsedShotTime;
+      radioData.currentTime = shotClockTimeToShow;
     } else {
       radioData.clockRunning = false;
       radioData.clockVisible = true;

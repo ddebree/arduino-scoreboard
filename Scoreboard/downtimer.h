@@ -26,8 +26,8 @@ class DownTimer : public Chrono {
     unsigned long getGameTimeToShow();
     unsigned long getShotTimeToShow();
 
-    void incGameTime();
-    void decGameTime();
+    void incGameTime(bool persistTimeChange);
+    void decGameTime(bool persistTimeChange);
     void resetShotClock();
 
   protected:

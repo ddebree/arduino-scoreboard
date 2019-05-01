@@ -26,7 +26,7 @@ bool Buzzer::isBuzzerOn() {
 
 void Buzzer::buzzerShort() {
   _buzzerOn = true;
-  _buzzerOffTime1 = millis() + 250;
+  _buzzerOffTime1 = millis() + 500;
   _buzzerOnTime2 = 0;
   _buzzerOffTime2 = 0;
 }
@@ -34,14 +34,14 @@ void Buzzer::buzzerShort() {
 void Buzzer::buzzerShortShort() {
   unsigned long currentTime = millis();
   _buzzerOn = true;
-  _buzzerOffTime1 = currentTime + 250L;
-  _buzzerOnTime2 = currentTime + 500L;
-  _buzzerOffTime2 = currentTime + 750L;
+  _buzzerOffTime1 = currentTime + 500L;
+  _buzzerOnTime2 = currentTime + 1000L;
+  _buzzerOffTime2 = currentTime + 1500L;
 }
 
 void Buzzer::buzzerLong() {
   _buzzerOn = true;
-  _buzzerOffTime1 = millis() + 1000;
+  _buzzerOffTime1 = millis() + 2000L;
   _buzzerOnTime2 = 0;
   _buzzerOffTime2 = 0;
 }

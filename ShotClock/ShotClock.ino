@@ -1,7 +1,7 @@
 #include <SPI.h>
 #include <NRFLite.h>
 
-const static uint8_t RADIO_ID = 23;       // Our radio's id.  The transmitter will send to this id.
+const static uint8_t RADIO_ID = 3;       // Our radio's id.  The transmitter will send to this id.
 const static uint8_t PIN_RADIO_CE = A0;
 const static uint8_t PIN_RADIO_CSN = A1;
 

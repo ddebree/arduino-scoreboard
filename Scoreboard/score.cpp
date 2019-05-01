@@ -5,6 +5,7 @@
 
 void Score::init(bool useSmallDigitForSmallScore) {
   _useSmallDigitForSmallScore = useSmallDigitForSmallScore;
+  reset();
 }
 
 uint8_t Score::getLeftDigit() {
